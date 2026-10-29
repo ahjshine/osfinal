@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shell and C Code Reference</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --panel: #f6f5f4;
+  --panel-2: #eeeeec;
+  --border: #d3d7cf;
+  --text: #2e3436;
+  --muted: #6b7075;
+  --accent: #3584e4;
+  --accent-text: #ffffff;
+  --gutter: #eeeeec;
+  --gutter-text: #888a85;
+  --line-hl: #eeeeec;
+  --hit: #fce94f55;
+  --c-kw: #a40000;
+  --c-com: #3465a4;
+  --c-str: #ad7fa8;
+  --c-num: #ad7fa8;
+  --c-type: #4e9a06;
+  --c-var: #c4a000;
+  --shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+:root[data-theme="dark"] {
+  --bg: #2e3436;
+  --panel: #353b3d;
+  --panel-2: #2a2f31;
+  --border: #4a5154;
+  --text: #eeeeec;
+  --muted: #a3a8a6;
+  --accent: #3584e4;
+  --accent-text: #ffffff;
+  --gutter: #3a4143;
+  --gutter-text: #8b918f;
+  --line-hl: #3a4143;
+  --hit: #c4a00040;
+  --c-kw: #ef2929;
+  --c-com: #729fcf;
+  --c-str: #ad7fa8;
+  --c-num: #ad7fa8;
+  --c-type: #8ae234;
+  --c-var: #fce94f;
+  --shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Cantarell, sans-serif;
+  line-height: 1.5;
+}
+/* Top bar */
+header {
+  position: fixed; top: 0; left: 0; right: 0; height: 60px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  z-index: 20;
+}
+header h1 { font-size: 16px; margin: 0; white-space: nowrap; font-weight: 600; }
+.search { flex: 1; max-width: 460px; position: relative; }
+.search input {
+  width: 100%; height: 36px; padding: 0 12px 0 34px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--text); font-size: 14px;
+  outline: none;
+}
+.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #3584e455; }
+.search svg { position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; }
+.spacer { flex: 1; }
+button {
+  font: inherit; font-size: 13px; cursor: pointer;
+  height: 34px; padding: 0 12px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--text);
+}
+button:hover { background: var(--panel-2); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+button.primary:hover { filter: brightness(1.1); }
+#menu { display: none; padding: 0 10px; }
+/* Sidebar */
+aside {
+  position: fixed; top: 60px; left: 0; bottom: 0; width: 270px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 12px 8px 24px;
+  z-index: 10;
+}
+aside h2 {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 14px 10px 6px;
+}
+aside a {
+  display: block; padding: 7px 10px; margin: 1px 0;
+  border-radius: 6px; color: var(--text); text-decoration: none; font-size: 14px;
+}
+aside a:hover { background: var(--panel-2); }
+aside a.active { background: var(--accent); color: var(--accent-text); }
+aside a.hidden { display: none; }
+/* ===== File browser sidebar (gedit style) ===== */
+:root { --fb-head: #ebebea; --fb-sel: #3584e4; --fb-sel-text: #fff; --fb-hover: #00000010; --fb-btn: #e1e1df; --fb-btn-border: #cdcdca; --fb-icon: #5e5c64; }
+:root[data-theme="dark"] { --fb-head: #323638; --fb-sel: #3584e4; --fb-sel-text: #fff; --fb-hover: #ffffff12; --fb-btn: #3d4345; --fb-btn-border: #50575a; --fb-icon: #deddda; }
+aside { padding: 0; display: flex; flex-direction: column; width: 270px; border-right: 1px solid var(--border); background: var(--bg); }
+.fb-title {
+  flex: none; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--fb-head); font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--border);
+}
+.chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fb-nav {
+  flex: none; display: flex; gap: 6px; align-items: center; padding: 6px 8px;
+  background: var(--fb-head); border-bottom: 1px solid var(--border);
+}
+.fb-nav button {
+  height: 30px; min-width: 32px; padding: 0 8px; background: var(--fb-btn);
+  border: 1px solid var(--fb-btn-border); border-radius: 6px; color: var(--text);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.fb-nav button:hover { filter: brightness(.96); background: var(--fb-btn); }
+.fb-nav svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fb-nav .seg { display: inline-flex; }
+.fb-nav .seg button:first-child { border-radius: 6px 0 0 6px; }
+.fb-nav .seg button:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.fb-nav .root { flex: 1; justify-content: space-between; font-size: 14px; min-width: 0; }
+.fb-nav .root span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
+#tree { flex: 1; overflow: auto; padding: 4px 0 20px; font-size: 14px; user-select: none; }
+#tree .row, #tree a {
+  display: flex; align-items: center; gap: 6px; height: 28px;
+  padding: 0 10px 0 6px; margin: 0; border-radius: 0; color: var(--text);
+  text-decoration: none; white-space: nowrap; cursor: default;
+}
+#tree .row:hover, #tree a:hover { background: var(--fb-hover); }
+#tree a.active, #tree a.active:hover { background: var(--fb-sel); color: var(--fb-sel-text); }
+#tree a { padding-left: 38px; }
+#tree a span { overflow: hidden; text-overflow: ellipsis; }
+#tree a.hidden { display: none; }
+#tree .arrow { width: 14px; height: 14px; flex: none; fill: none; stroke: var(--fb-icon); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .12s; }
+#tree .folder.collapsed .arrow { transform: rotate(-90deg); }
+#tree .folder.collapsed .kids { display: none; }
+#tree .ico { width: 18px; height: 18px; flex: none; }
+#tree .row { cursor: pointer; }
+/* Main */
+main { margin-left: 270px; padding: 84px 28px 60px; max-width: 1100px; }
+.group-title { font-size: 22px; margin: 30px 0 10px; }
+.group-title:first-child { margin-top: 0; }
+.run {
+  background: var(--panel); border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px; padding: 10px 14px; margin: 0 0 22px; font-size: 14px;
+}
+.run b { display: block; margin-bottom: 4px; }
+.run code { font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; }
+.run div { font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 13px; }
+/* Code cards, editor-like */
+.card {
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  margin: 0 0 28px; background: var(--bg); box-shadow: var(--shadow);
+}
+.card.hidden { display: none; }
+.card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.card-head h3 { font-size: 15px; margin: 0; flex: 1; font-weight: 600; }
+.badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+}
+.code-wrap { overflow-x: auto; }
+.code {
+  margin: 0; padding: 6px 0;
+  font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  font-size: 13.5px; line-height: 1.55;
+  counter-reset: ln;
+  min-width: max-content;
+}
+.line { display: block; white-space: pre; padding-right: 16px; min-height: 1.55em; }
+.line::before {
+  counter-increment: ln; content: counter(ln);
+  display: inline-block; width: 4.2ch; text-align: right;
+  padding-right: 10px; margin-right: 12px;
+  color: var(--gutter-text); background: var(--gutter);
+  position: sticky; left: 0;
+  user-select: none;
+}
+.line:hover { background: var(--line-hl); }
+.line.hit { background: var(--hit); }
+.statusbar {
+  display: flex; justify-content: flex-end; gap: 18px;
+  padding: 4px 12px; font-size: 12px; color: var(--muted);
+  background: var(--panel); border-top: 1px solid var(--border);
+}
+.k { color: var(--c-kw); font-weight: 700; }
+.c { color: var(--c-com); }
+.s { color: var(--c-str); }
+.n { color: var(--c-num); }
+.t { color: var(--c-type); font-weight: 700; }
+.v { color: var(--c-var); }
+#empty { display: none; padding: 40px; text-align: center; color: var(--muted); }
+#toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #2e3436; color: #fff; padding: 10px 16px; border-radius: 6px;
+  font-size: 14px; opacity: 0; transform: translateY(10px);
+  transition: all .2s; pointer-events: none; z-index: 50;
+}
+#toast.show { opacity: 1; transform: none; }
+@media (max-width: 800px) {
+  #menu { display: inline-block; }
+  header h1 { display: none; }
+  aside { transform: translateX(-100%); transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.2); }
+  aside.open { transform: none; }
+  main { margin-left: 0; padding: 80px 12px 40px; }
+  button .lbl { display: none; }
+}
+/* ===== Single editor view (gedit style) ===== */
+html, body { height: 100%; overflow: hidden; }
+main { margin-left: 270px; max-width: none; padding: 60px 0 0; height: 100vh; display: flex; flex-direction: column; }
+.group-title, .run { display: none !important; }
+#empty { padding: 60px 20px; }
+.card {
+  display: none; flex: 1; min-height: 0; flex-direction: column;
+  margin: 0; border: 0; border-radius: 0; box-shadow: none; background: var(--bg);
+}
+.card.current { display: flex; }
+.card-head {
+  flex: none; height: 40px; padding: 0 6px 0 0; gap: 0;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+}
+.card-head h3 {
+  flex: 1; height: 40px; line-height: 37px; margin: 0;
+  text-align: center; font-size: 14px; font-weight: 400;
+  border-bottom: 3px solid var(--accent); background: var(--panel-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-head .badge { display: none; }
+.card-head button { height: 28px; margin-left: 8px; font-size: 13px; padding: 0 12px; }
+.code-wrap { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.code { padding: 0; font-size: 15px; line-height: 23px; min-height: 100%; }
+.line { min-height: 23px; padding-right: 24px; cursor: text; }
+.line:hover { background: transparent; }
+.line.hit { background: var(--hit); }
+.line.cur, .line.cur.hit { background: var(--line-hl); }
+.line::before { width: 4ch; padding-right: 6px; margin-right: 5px; background: var(--gutter); }
+.statusbar {
+  flex: none; height: 28px; padding: 0; gap: 0; align-items: center; justify-content: flex-start;
+  font-size: 13px; color: var(--text); background: var(--bg); border-top: 1px solid var(--border);
+}
+.statusbar span { padding: 0 12px; white-space: nowrap; }
+.statusbar .run-info {
+  margin-right: auto; color: var(--muted); overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 12.5px;
+}
+@media (max-width: 800px) { main { margin-left: 0; padding: 60px 0 0; } .statusbar .tw { display: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <button id="menu" aria-label="Toggle sidebar">&#9776;</button>
+  <h1>Code Reference</h1>
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="Search programs and code  ( press / )" autocomplete="off">
+  </div>
+  <div class="spacer"></div>
+  <button id="copyAll" class="primary">Copy all codes</button>
+  <button id="theme" aria-label="Toggle dark mode">&#9790; <span class="lbl">Dark</span></button>
+</header>
+
+<aside id="side">
+  <div class="fb-title"><span>File Browser</span>
+    <svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+  </div>
+  <div class="fb-nav">
+    <div class="seg">
+      <button id="navBack" title="Previous" aria-label="Previous"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button>
+      <button id="navFwd" title="Next" aria-label="Next"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+    </div>
+    <button id="navUp" class="up" title="Back to top" aria-label="Back to top"><svg viewBox="0 0 16 16"><path d="M3 10l5-5 5 5"/></svg></button>
+    <button id="navRoot" class="root" title="Expand / collapse all"><span>code-reference</span><svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>
+  </div>
+  <div id="tree"></div>
+</aside>
+
+<main id="main">
+  <div id="empty">No programs match your search.</div>
+</main>
+
+<div id="toast"></div>
+
+<!-- ================= SHELL SCRIPTS ================= -->
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="1. Basic Linux Commands">
+#!/bin/bash
+
+echo "===== BASIC LINUX COMMANDS ====="
+
+WORK="$HOME/shell_demo"
+mkdir -p "$WORK"
+cd "$WORK" || exit 1
+
+echo "Current directory:"
+pwd
+
+echo "List files:"
+ls
+
+echo "Change directory:"
+cd ..
+pwd
+cd "$WORK" || exit 1
+
+echo "Create and remove directory:"
+mkdir -p shine
+ls -d shine
+rmdir shine
+mkdir shine
+cd shine || exit 1
+
+echo "===== FILE CREATION ====="
+
+echo "my name is shine" > sample1.txt
+echo "I am a student" >> sample1.txt
+cat sample1.txt
+
+printf "line1 apple\nline2 mango\nline3 banana\nline4 cherry\nline5 grape\nzebra line6\n" > sample.txt
+
+touch copy.txt
+cp sample.txt copy.txt
+cat copy.txt
+
+echo "===== HEAD AND TAIL ====="
+
+head -2 sample.txt
+tail -2 sample.txt
+
+echo "Last 25 characters:"
+tail -c 25 sample.txt
+echo
+
+echo "First 25 characters:"
+head -c 25 sample.txt
+echo
+
+echo "===== SORT ====="
+
+sort sample.txt
+sort -r sample.txt
+
+echo "===== CUT ====="
+
+cut -b 1-9,15-24 sample.txt
+cut -b 1,2,3 sample.txt
+cut -b -4 sample.txt
+cut -c 2,5,7 sample.txt
+
+echo "===== FILE PERMISSIONS ====="
+
+chmod +w sample.txt
+chmod +r sample.txt
+chmod +x sample.txt
+ls -l sample.txt
+
+echo "===== WORD COUNT ====="
+
+wc sample.txt
+wc -l sample.txt
+wc -w sample.txt
+wc -c sample.txt
+wc -m sample.txt
+
+echo "===== BC COMMAND ====="
+
+if command -v bc >/dev/null 2>&1; then
+    echo "12+5" | bc
+    echo "scale=2; 10/3" | bc
+    echo "5 > 3" | bc
+else
+    echo "bc is not installed."
+fi
+
+echo "===== SYSTEM COMMANDS ====="
+
+tty || true
+who
+ps
+history
+
+echo "===== TIME COMMAND ====="
+
+time ls > /dev/null
+
+echo "===== DATE COMMAND ====="
+
+date
+date +%h
+date +%m
+date +%y
+date +%Y
+date +%p
+date +%d
+date +%a
+date +%A
+date +%B
+
+echo "===== TOP COMMAND ====="
+
+top -b -n 1 | head -5 || true
+
+echo "===== REMOVE FILES ====="
+
+rm sample1.txt
+ls
+
+cd ..
+rm -r shine
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="2. File Operations">
+#!/bin/bash
+
+echo "===== FILE OPERATIONS ====="
+
+read -r -p "Enter filename: " filename
+
+if [ -z "$filename" ]; then
+    echo "Filename cannot be empty."
+    exit 1
+fi
+
+if [ -e "$filename" ]; then
+    read -r -p "File exists. Overwrite? (y/n): " ans
+    if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
+        exit 0
+    fi
+fi
+
+touch -- "$filename" || exit 1
+
+echo "File created successfully."
+
+echo "Enter file contents:"
+echo "Press Ctrl+D on a new line to finish."
+
+cat > "$filename"
+
+echo "===== FILE CONTENTS ====="
+cat -- "$filename"
+
+echo "===== WORD COUNT ====="
+wc -w -- "$filename"
+
+echo "===== LINE COUNT ====="
+wc -l -- "$filename"
+
+echo "===== CHARACTER COUNT ====="
+wc -m -- "$filename"
+
+echo "===== BYTE COUNT ====="
+wc -c -- "$filename"
+
+echo "===== SORTED CONTENT ====="
+sort -- "$filename"
+
+echo "===== REVERSE SORT ====="
+sort -r -- "$filename"
+
+echo "===== UPPERCASE ====="
+tr '[:lower:]' '[:upper:]' < "$filename"
+
+echo "===== DISPLAY FIRST N LINES ====="
+
+read -r -p "Enter number of lines: " n
+
+if [[ "$n" =~ ^[0-9]+$ ]]; then
+    head -n "$n" -- "$filename"
+else
+    echo "Invalid number."
+fi
+
+echo "===== SEARCH KEYWORD ====="
+
+read -r -p "Enter keyword: " keyword
+
+if [ -n "$keyword" ]; then
+    grep -nF -- "$keyword" "$filename" || echo "No match found."
+fi
+
+echo "===== RENAME FILE ====="
+
+read -r -p "Enter new filename (blank to skip): " newname
+
+if [ -n "$newname" ]; then
+    if [ -e "$newname" ]; then
+        echo "Target already exists. Rename skipped."
+    elif mv -- "$filename" "$newname"; then
+        filename="$newname"
+        echo "File renamed successfully."
+    fi
+fi
+
+echo "===== EXTRACT CHARACTERS ====="
+
+read -r -p "Enter starting position: " start
+read -r -p "Enter ending position: " end
+
+if [[ "$start" =~ ^[1-9][0-9]*$ &&
+      "$end" =~ ^[1-9][0-9]*$ ]] &&
+   (( start <= end )); then
+    cut -c "$start-$end" -- "$filename"
+else
+    echo "Invalid range."
+fi
+
+echo "===== DELETE FILE ====="
+
+read -r -p "Delete file? (y/n): " choice
+
+if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
+    rm -- "$filename"
+    echo "File deleted."
+else
+    echo "File not deleted."
+fi
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="3. Arithmetic, Circle and Salary Calculations">
+#!/bin/bash
+
+echo "===== ARITHMETIC OPERATIONS ====="
+
+if ! command -v bc >/dev/null 2>&1; then
+    echo "Install bc first: sudo apt install bc"
+    exit 1
+fi
+
+read -r -p "Enter first integer: " a
+read -r -p "Enter second integer: " b
+
+if ! [[ "$a" =~ ^-?[0-9]+$ &&
+        "$b" =~ ^-?[0-9]+$ ]]; then
+    echo "Invalid integers."
+    exit 1
+fi
+
+echo "Addition = $((a+b))"
+echo "Subtraction = $((a-b))"
+echo "Multiplication = $((a*b))"
+
+if (( b != 0 )); then
+    echo "Integer division = $((a/b))"
+    echo "Remainder = $((a%b))"
+
+    echo "Decimal division:"
+    echo "scale=2; $a/$b" | bc
+
+    echo "Using expr:"
+    expr "$a" + "$b"
+    expr "$a" \* "$b"
+    expr "$a" % "$b"
+else
+    echo "Division by zero not allowed."
+fi
+
+echo "===== LET COMMAND ====="
+
+let "square = a * a"
+echo "Square of $a = $square"
+
+echo "===== CIRCLE CALCULATIONS ====="
+
+read -r -p "Enter radius: " r
+
+if ! [[ "$r" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Invalid radius."
+    exit 1
+fi
+
+pi=3.14159
+
+area=$(echo "scale=2; $pi*$r*$r" | bc)
+perimeter=$(echo "scale=2; 2*$pi*$r" | bc)
+
+echo "Area = $area"
+echo "Perimeter = $perimeter"
+
+echo "===== SALARY CALCULATIONS ====="
+
+read -r -p "Enter basic salary: " basic
+
+if ! [[ "$basic" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Invalid salary."
+    exit 1
+fi
+
+# DA = 165% and HRA = 30% of basic salary
+
+da=$(echo "scale=2; $basic*1.65" | bc)
+hra=$(echo "scale=2; $basic*0.30" | bc)
+
+gross=$(echo "scale=2; $basic+$da+$hra" | bc)
+
+echo "Basic Salary = $basic"
+echo "DA = $da"
+echo "HRA = $hra"
+echo "Gross Salary = $gross"
+
+echo "===== AVERAGE SALARY ====="
+
+A=1200
+B=1400
+C=1350
+D=1800
+
+total=$((A+B+C+D))
+
+average=$(echo "scale=2; $total/4" | bc)
+
+echo "Total Salary = $total"
+echo "Average Salary = $average"
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="4. Conditional Statements">
+#!/bin/bash
+
+echo "===== EVEN OR ODD ====="
+
+read -r -p "Enter a number: " n
+
+if ! [[ "$n" =~ ^-?[0-9]+$ ]]; then
+    echo "Invalid integer."
+    exit 1
+fi
+
+if (( n % 2 == 0 )); then
+    echo "$n is Even"
+else
+    echo "$n is Odd"
+fi
+
+echo "===== LARGEST OF THREE ====="
+
+read -r -p "Enter three numbers: " x y z
+
+for value in "$x" "$y" "$z"; do
+    if ! [[ "$value" =~ ^-?[0-9]+$ ]]; then
+        echo "Invalid integer."
+        exit 1
+    fi
+done
+
+if (( x >= y && x >= z )); then
+    echo "Largest = $x"
+elif (( y >= z )); then
+    echo "Largest = $y"
+else
+    echo "Largest = $z"
+fi
+
+echo "===== LEAP YEAR ====="
+
+read -r -p "Enter year: " yr
+
+if ! [[ "$yr" =~ ^[0-9]+$ ]] || (( yr < 1 )); then
+    echo "Invalid year."
+    exit 1
+fi
+
+if (( yr % 400 == 0 ||
+      (yr % 4 == 0 && yr % 100 != 0) )); then
+    echo "$yr is a Leap Year"
+else
+    echo "$yr is Not a Leap Year"
+fi
+
+echo "===== BANK WITHDRAWAL ====="
+
+if ! command -v bc >/dev/null 2>&1; then
+    echo "Install bc to run withdrawal calculations."
+    exit 1
+fi
+
+read -r -p "Enter account balance: " bal
+read -r -p "Enter withdrawal amount: " w
+
+if ! [[ "$bal" =~ ^[0-9]+([.][0-9]+)?$ &&
+        "$w" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Invalid amount."
+    exit 1
+fi
+
+if [ "$(echo "$w <= 0" | bc)" -eq 1 ]; then
+    echo "Withdrawal must be positive."
+    exit 1
+fi
+
+if [ "$(echo "$w <= 1500" | bc)" -eq 1 ]; then
+    rate=3
+elif [ "$(echo "$w <= 3000" | bc)" -eq 1 ]; then
+    rate=4
+else
+    rate=5
+fi
+
+tax=$(echo "scale=2; $w*$rate/100" | bc)
+total=$(echo "$w+$tax" | bc)
+
+if [ "$(echo "$total > $bal" | bc)" -eq 1 ]; then
+    echo "Insufficient balance including tax."
+else
+    remaining=$(echo "$bal-$total" | bc)
+
+    echo "Withdrawal = $w"
+    echo "Tax Rate = $rate%"
+    echo "Tax = $tax"
+    echo "Total Deduction = $total"
+    echo "Remaining Balance = $remaining"
+fi
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="5. for Loop: Patterns, Chessboard, Wages and Factorial">
+#!/bin/bash
+
+echo "===== FOR LOOP PROGRAMS ====="
+
+read -r -p "Enter number of rows: " n
+
+if ! [[ "$n" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Enter a positive integer."
+    exit 1
+fi
+
+echo "===== RIGHT TRIANGLE ====="
+
+for ((i=1; i<=n; i++)); do
+    for ((j=1; j<=i; j++)); do
+        printf "*"
+    done
+    echo
+done
+
+echo "===== INVERTED TRIANGLE ====="
+
+for ((i=n; i>=1; i--)); do
+    for ((j=1; j<=i; j++)); do
+        printf "*"
+    done
+    echo
+done
+
+echo "===== FULL DIAMOND ====="
+
+for ((i=1; i<=n; i++)); do
+    for ((s=i; s<n; s++)); do
+        printf " "
+    done
+
+    for ((j=1; j<=2*i-1; j++)); do
+        printf "*"
+    done
+    echo
+done
+
+for ((i=n-1; i>=1; i--)); do
+    for ((s=i; s<n; s++)); do
+        printf " "
+    done
+
+    for ((j=1; j<=2*i-1; j++)); do
+        printf "*"
+    done
+    echo
+done
+
+echo "===== CHESSBOARD ====="
+
+for ((r=0; r<8; r++)); do
+    for ((c=0; c<8; c++)); do
+        if (( (r+c)%2 == 0 )); then
+            printf "\033[47m  "
+        else
+            printf "\033[40m  "
+        fi
+    done
+    printf "\033[0m\n"
+done
+
+echo "===== WEEKLY WAGES ====="
+
+d=1
+total=0
+
+for day in Mon Tue Wed Thu Fri Sat Sun; do
+    if (( d <= 5 )); then
+        wage=350
+        echo "Day $d: $day (Weekday) = $wage"
+    else
+        wage=550
+        echo "Day $d: $day (Weekend) = $wage"
+    fi
+
+    total=$((total+wage))
+    d=$((d+1))
+done
+
+echo "Total weekly wage = $total"
+
+echo "===== FACTORIAL ====="
+
+read -r -p "Enter number for factorial (0-20): " f
+
+if ! [[ "$f" =~ ^[0-9]+$ ]] || (( f > 20 )); then
+    echo "Enter an integer between 0 and 20."
+    exit 1
+fi
+
+fact=1
+
+for ((i=2; i<=f; i++)); do
+    fact=$((fact*i))
+done
+
+echo "$f! = $fact"
+
+echo "===== NUMBER SEQUENCE ====="
+
+for x in {1..5}; do
+    printf "%s " "$x"
+done
+
+echo
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="6. while and until Loops">
+#!/bin/bash
+
+echo "===== WHILE AND UNTIL LOOPS ====="
+
+read -r -p "Enter positive integer N: " N
+
+if ! [[ "$N" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Invalid number."
+    exit 1
+fi
+
+echo "===== SUM 1 TO N USING UNTIL ====="
+
+i=1
+sum=0
+
+until (( i > N )); do
+    sum=$((sum+i))
+    i=$((i+1))
+done
+
+echo "Sum = $sum"
+
+echo "===== REVERSE NUMBER PATTERN ====="
+
+r=$N
+
+until (( r < 1 )); do
+    c=1
+
+    until (( c > r )); do
+        printf "%d" "$c"
+        c=$((c+1))
+    done
+
+    echo
+    r=$((r-1))
+done
+
+echo "===== EVEN AND ODD SUMS ====="
+
+i=1
+even=0
+odd=0
+
+while (( i <= N )); do
+    if (( i % 2 == 0 )); then
+        even=$((even+i))
+    else
+        odd=$((odd+i))
+    fi
+
+    i=$((i+1))
+done
+
+echo "Sum of even numbers = $even"
+echo "Sum of odd numbers = $odd"
+
+echo "===== REPEATED NUMBER PATTERN ====="
+
+i=1
+
+while (( i <= N )); do
+    j=1
+
+    while (( j <= i )); do
+        printf "%d" "$i"
+        j=$((j+1))
+    done
+
+    echo
+    i=$((i+1))
+done
+
+echo "===== PALINDROMIC NUMBER PATTERN ====="
+
+i=1
+
+until (( i > N )); do
+    j=1
+
+    until (( j > i )); do
+        printf "%d" "$j"
+        j=$((j+1))
+    done
+
+    j=$((i-1))
+
+    until (( j < 1 )); do
+        printf "%d" "$j"
+        j=$((j-1))
+    done
+
+    echo
+    i=$((i+1))
+done
+
+echo "===== LARGEST AND SMALLEST DIGIT ====="
+
+read -r -p "Enter a nonnegative integer: " num
+
+if ! [[ "$num" =~ ^[0-9]+$ ]]; then
+    echo "Invalid number."
+    exit 1
+fi
+
+t=$num
+big=0
+small=9
+
+if (( t == 0 )); then
+    small=0
+fi
+
+while (( t > 0 )); do
+    d=$((t%10))
+
+    if (( d > big )); then
+        big=$d
+    fi
+
+    if (( d < small )); then
+        small=$d
+    fi
+
+    t=$((t/10))
+done
+
+echo "Largest digit = $big"
+echo "Smallest digit = $small"
+
+echo "===== PRIME NUMBER CHECK ====="
+
+read -r -p "Enter number: " p
+
+if ! [[ "$p" =~ ^[0-9]+$ ]]; then
+    echo "Invalid number."
+    exit 1
+fi
+
+prime=1
+
+if (( p < 2 )); then
+    prime=0
+else
+    k=2
+
+    until (( k*k > p )); do
+        if (( p % k == 0 )); then
+            prime=0
+            break
+        fi
+
+        k=$((k+1))
+    done
+fi
+
+if (( prime == 1 )); then
+    echo "$p is a Prime Number"
+else
+    echo "$p is Not a Prime Number"
+fi
+
+echo "===== READ FILE LINE BY LINE ====="
+
+printf "line1\nline2\nline3\n" > temp_lab.txt
+
+while IFS= read -r line; do
+    echo "Read: $line"
+done < temp_lab.txt
+
+rm temp_lab.txt
+
+echo "===== CONTINUE STATEMENT ====="
+
+for n in 1 2 3 4 5 6; do
+    if (( n % 2 == 0 )); then
+        continue
+    fi
+
+    printf "odd:%d " "$n"
+done
+
+echo
+</script>
+
+<script type="text/plain" data-group="Shell Scripts" data-lang="bash" data-title="7. case ... esac Statements and Date/Time Menu">
+#!/bin/bash
+
+echo "===== CASE STATEMENT PROGRAMS ====="
+
+echo "===== VOWEL OR CONSONANT ====="
+
+read -r -p "Enter a character: " ch
+
+case "$ch" in
+    [aAeEiIoOuU])
+        echo "Vowel"
+        ;;
+    [a-zA-Z])
+        echo "Consonant"
+        ;;
+    *)
+        echo "Not a single alphabet"
+        ;;
+esac
+
+echo "===== CHARACTER CLASSIFICATION ====="
+
+case "$ch" in
+    [[:upper:]])
+        echo "Uppercase"
+        ;;
+    [[:lower:]])
+        echo "Lowercase"
+        ;;
+    [[:digit:]])
+        echo "Digit"
+        ;;
+    *)
+        echo "Special symbol or invalid input"
+        ;;
+esac
+
+echo "===== NUMBER OF DIGITS ====="
+
+read -r -p "Enter a nonnegative integer: " num
+
+if [[ "$num" =~ ^[0-9]+$ ]]; then
+    case ${#num} in
+        1) echo "Single digit" ;;
+        2) echo "Two digits" ;;
+        3) echo "Three digits" ;;
+        *) echo "More than three digits" ;;
+    esac
+else
+    echo "Invalid integer"
+fi
+
+echo "===== FILE TYPE ====="
+
+read -r -p "Enter filename: " f
+
+if [ -f "$f" ]; then
+    type=file
+elif [ -d "$f" ]; then
+    type=dir
+else
+    type=other
+fi
+
+case "$type" in
+    file)
+        echo "Regular file"
+        ;;
+    dir)
+        echo "Directory"
+        ;;
+    *)
+        echo "Other or not found"
+        ;;
+esac
+
+echo "===== VEHICLE CLASSIFICATION ====="
+
+read -r -p "Vehicle (car/bike/truck/bus): " v
+
+case "${v,,}" in
+    car|bike)
+        echo "Personal Vehicle"
+        ;;
+    truck)
+        echo "Heavy Vehicle"
+        ;;
+    bus)
+        echo "Public Transport"
+        ;;
+    *)
+        echo "Unknown Category"
+        ;;
+esac
+
+echo "===== FRUIT CLASSIFICATION ====="
+
+read -r -p "Enter fruit: " fr
+
+case "${fr,,}" in
+    apple|mango|banana)
+        echo "Common Fruits"
+        ;;
+    strawberry|blueberry)
+        echo "Berries"
+        ;;
+    coconut|walnut)
+        echo "Dry Fruits"
+        ;;
+    *)
+        echo "Category Not Found"
+        ;;
+esac
+
+echo "===== SEASON CLASSIFICATION ====="
+
+read -r -p "Enter month (name or 1-12): " mo
+
+case "${mo,,}" in
+    12|1|2|dec*|jan*|feb*)
+        echo "Winter"
+        ;;
+    3|4|5|mar*|apr*|may*)
+        echo "Spring"
+        ;;
+    6|7|8|jun*|jul*|aug*)
+        echo "Summer"
+        ;;
+    9|10|11|sep*|oct*|nov*)
+        echo "Autumn"
+        ;;
+    *)
+        echo "Invalid Month"
+        ;;
+esac
+
+echo "===== DATE AND TIME MENU ====="
+
+while true; do
+    echo
+    echo "1. 24-hour time"
+    echo "2. 12-hour time"
+    echo "3. Today's date"
+    echo "4. Date and time"
+    echo "5. GMT time"
+    echo "6. Exit"
+
+    read -r -p "Enter choice: " choice
+
+    case "$choice" in
+        1)
+            date +"%H:%M:%S"
+            ;;
+        2)
+            date +"%I:%M:%S %p"
+            ;;
+        3)
+            date +"%Y-%m-%d"
+            ;;
+        4)
+            date +"%Y-%m-%d %H:%M:%S"
+            ;;
+        5)
+            TZ=GMT date +"%H:%M:%S %Z"
+            ;;
+        6)
+            echo "Exiting..."
+            break
+            ;;
+        *)
+            echo "Invalid choice"
+            ;;
+    esac
+done
+</script>
+
+<!-- ================= C PROGRAMS ================= -->
+
+<script type="text/plain" data-group="C Programs (Input)" data-lang="c" data-title="1. LRU Page Replacement (User Input)">
+#include <stdio.h>
+
+#define MAX_FRAMES 10  // Max frames array can hold
+#define MAX_REFS 100   // Max page reference string length
+
+void lru_page_replacement(int pages[], int n, int capacity) {
+
+    // VARIABLE DECLARE
+
+    // declare all tracking arrays for frames and access timestamps
+    int frames[MAX_FRAMES];      // Stores page numbers currently loaded in memory
+    int last_used[MAX_FRAMES];   // Stores the timestamp/time of last access for each frame
+
+    // declare all variables that track progress and statistics
+    int frame_count = 0;         // Number of currently occupied frames
+    int page_faults = 0;         // Total page fault counter
+    int page_hits = 0;           // Total page hit counter
+
+    // Initialize all frames and timestamps to -1 (meaning empty)
+    for (int i = 0; i < capacity; i++) {
+        frames[i] = -1;
+        last_used[i] = -1;
+    }
+
+    // ------------------------------------------
+
+    // PRINT TABLE HEADER
+  // Print table header cleanly
+    printf("\nStep\tPage\t");
+    for (int i = 0; i < capacity; i++) {
+        printf("F%d\t", i + 1);
+    }
+    printf("Status\tEvicted\n");
+    printf("-------------------------------------------------------------------\n");
+    // ------------------------------------------
+
+    // SIMULATION LOOP: Process each page reference step-by-step over time
+    for (int time = 0; time < n; time++) {
+        int page = pages[time];       // Current page being referenced
+        int pos = -1;                 // Position if found in frames (-1 means not found)
+        int is_hit = 0;               // Flag for hit (1) or fault (0)
+        int replaced_page = -1;       // Tracks which page was evicted during a fault
+
+        // CHECK IF PAGE IS ALREADY IN MEMORY (PAGE HIT)
+        for (int j = 0; j < frame_count; j++) {
+            if (frames[j] == page) {
+                pos = j;
+                break;
+            }
+        }
+
+        // HANDLE HIT OR FAULT
+        if (pos != -1) {
+            // PAGE HIT: Page is already in memory, update its last used timestamp
+            last_used[pos] = time;
+            page_hits++;
+            is_hit = 1;
+        } else {
+            // PAGE FAULT: Page is not in memory, needs to be brought in
+            page_faults++;
+
+            // Case A: There is still an empty frame available
+            if (frame_count < capacity) {
+                frames[frame_count] = page;
+                last_used[frame_count] = time;
+                frame_count++;
+            } 
+            // Case B: Memory is full, must replace Least Recently Used (LRU) page
+            else {
+                // Find frame with the smallest last_used time (oldest access)
+                int lru_index = 0;
+                for (int j = 1; j < capacity; j++) {
+                    if (last_used[j] < last_used[lru_index]) {
+                        lru_index = j;
+                    }
+                }
+
+                replaced_page = frames[lru_index]; // Record evicted page for display
+                frames[lru_index] = page;          // Load new page into LRU slot
+                last_used[lru_index] = time;       // Update its timestamp
+            }
+        }
+
+        // ------------------------------------------
+
+        // PRINT CURRENT STEP ROW
+        printf("%-d\t%-d\t", time + 1, page);
+        for (int j = 0; j < capacity; j++) {
+            if (frames[j] == -1) printf("-\t");
+            else printf("%d\t", frames[j]);
+        }
+
+        if (is_hit) {
+            printf("Hit\t-\n");
+        } else {
+            if (replaced_page != -1) printf("Fault\tPage %d\n", replaced_page);
+            else printf("Fault\tNone\n");
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT SUMMARY STATISTICS
+    float hit_ratio = ((float)page_hits / n) * 100.0f;
+    float miss_ratio = ((float)page_faults / n) * 100.0f;
+
+    printf("\nTotal References : %d\n", n);
+    printf("Total Page Faults: %d\n", page_faults);
+    printf("Total Page Hits  : %d\n", page_hits);
+    printf("Hit Ratio        : %.2f%%\n", hit_ratio);
+    printf("Miss Ratio       : %.2f%%\n", miss_ratio);
+}
+
+int main(void) {
+    // take capacity, reference string length, and page values, then pass them to simulation function
+
+    int capacity, n;
+    int pages[MAX_REFS];
+
+    // Ask number of frames
+    printf("Enter number of page frames: ");
+    if (scanf("%d", &capacity) != 1 || capacity <= 0 || capacity > MAX_FRAMES) return 1;
+
+    // Ask number of page references
+    printf("Enter number of page references: ");
+    if (scanf("%d", &n) != 1 || n <= 0 || n > MAX_REFS) return 1;
+
+    // Collect page reference values
+    printf("Enter %d page reference values: ", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    // Run simulation
+    lru_page_replacement(pages, n, capacity);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Input)" data-lang="c" data-title="2. Priority Preemptive (User Input)">
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_PROC 20          // Max processes array can hold
+#define TIMELINE_LEN 500     // Max timeline length for tick-by-tick tracking
+
+void solve(int n, int at[], int bt[], int pr[]) {
+
+    // VARIABLE DECLARE
+
+    // declare all tracking and table metric arrays
+    int rem[MAX_PROC];        // Remaining CPU burst time (decrements each tick)
+    int ct[MAX_PROC];         // Completion time
+    int st[MAX_PROC];         // Start time (first time CPU dispatches the process)
+    int pre[MAX_PROC];        // Preemption count tracker
+
+    // declare timeline array to track running process ID at every single time tick
+    int tl[TIMELINE_LEN];     
+
+    // declare all variables that track progress and state
+    int time = 0;             // System clock starting at 0
+    int done = 0;             // Counter for how many processes have finished
+    int last = -1;            // Process ID that ran in the previous tick
+    int cs = 0;               // Total context switches counter
+
+    // init tracking arrays
+    for (int i = 0; i < n; i++) {
+        rem[i] = bt[i];       // Remaining time starts equal to burst time
+        st[i] = -1;           // -1 means process hasn't started yet
+        pre[i] = 0;           // Zero preemptions initially
+    }
+
+    // ------------------------------------------
+
+    // TICK-BY-TICK SIMULATION LOOP
+    // Runs every single clock tick until all processes are completed
+    while (done < n) {
+        int cur = -1; // Index of current highest priority process (-1 means none ready)
+
+        // Find arrived process with highest priority (lower number = higher priority)
+        // Tie-breaker: if priorities match, pick the one that arrived earlier
+        for (int i = 0; i < n; i++) {
+            if (at[i] <= time && rem[i] > 0) { // If process has arrived and still has work left
+                if (cur == -1 || pr[i] < pr[cur] || (pr[i] == pr[cur] && at[i] < at[cur])) {
+                    cur = i;
+                }
+            }
+        }
+
+        // IF NO PROCESS ARRIVED, CPU IS IDLE FOR 1 TIME UNIT
+        if (cur == -1) {
+            tl[time++] = -1; // -1 represents IDLE state in our timeline array
+            last = -1;       // Reset last running process tracker
+            continue;
+        }
+
+        // DETECT PREEMPTION AND CONTEXT SWITCH
+        // If a different process was running last tick, we have a context switch
+        if (last != -1 && last != cur) {
+            cs++;
+            if (rem[last] > 0) {
+                pre[last]++; // If the previous process still has work, it was preempted!
+            }
+        }
+
+        // RECORD FIRST START TIME (for Response Time calculation later)
+        if (st[cur] == -1) {
+            st[cur] = time; // Records the exact moment the process first touches the CPU
+        }
+
+        // EXECUTE PROCESS FOR 1 TIME UNIT
+        tl[time++] = cur;   // Log current process ID at this time tick
+        rem[cur]--;         // Decrease its remaining burst time by 1
+        last = cur;         // Update last running process tracker
+
+        // CHECK IF PROCESS FINISHED EXECUTION
+        if (rem[cur] == 0) {
+            ct[cur] = time; // Record completion time
+            done++;         // Increment completed process count
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT EVERYTHING
+
+    // 1. Render Merged Gantt Chart
+    printf("\nGantt Chart:\n");
+    for (int t = 0; t < time;) {
+        int p = tl[t];
+        while (t < time && tl[t] == p) t++;
+        if (p == -1) printf("| IDLE ");
+        else printf("| P%d ", p + 1);
+    }
+    printf("|\n0");
+
+    for (int t = 0; t < time;) {
+        int p = tl[t];
+        while (t < time && tl[t] == p) t++;
+        char cell[16];
+        if (p == -1) strcpy(cell, "| IDLE ");
+        else sprintf(cell, "| P%d ", p + 1);
+        printf("%*d", (int)strlen(cell), t);
+    }
+    printf("\n");
+
+    // 2. Print Per-Process Metrics Table
+    printf("\nProc\tAT\tBT\tPriority\tCT\tTAT\tWT\tRT\tPreemptions\n");
+    printf("-----------------------------------------------------------------------\n");
+
+    float sum_tat = 0.0f, sum_wt = 0.0f;
+    int max_wt = -1, max_rt = -1;
+    int max_wt_proc = 0, max_rt_proc = 0;
+
+    for (int i = 0; i < n; i++) {
+        int tat = ct[i] - at[i]; // Turnaround Time = Completion Time - Arrival Time
+        int wt = tat - bt[i];    // Waiting Time = Turnaround Time - Burst Time
+        int rt = st[i] - at[i];    // Response Time = First Start Time - Arrival Time
+
+        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], pr[i], ct[i], tat, wt, rt, pre[i]);
+
+        sum_tat += tat;
+        sum_wt += wt;
+
+        // Track maximum waiting time and response time
+        if (wt > max_wt) { max_wt = wt; max_wt_proc = i; }
+        if (rt > max_rt) { max_rt = rt; max_rt_proc = i; }
+    }
+
+    // 3. Print Summary Averages and Extremes
+    printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n);
+    printf("Number of Context Switches = %d\n", cs);
+    printf("Maximum WT                 = %d -> P%d\n", max_wt, max_wt_proc + 1);
+    printf("Maximum RT                 = %d -> P%d\n", max_rt, max_rt_proc + 1);
+}
+
+int main(void) {
+
+    // Take number of processes, AT, BT, and Priority, then pass them to solve function
+
+    int n;             // Number of processes entered by user
+    int at[MAX_PROC];  // Array to store Arrival Times
+    int bt[MAX_PROC];  // Array to store Burst Times
+    int pr[MAX_PROC];  // Array to store Priorities
+
+    // Ask number of processes
+    printf("Enter number of processes: ");
+    if (scanf("%d", &n) != 1 || n <= 0 || n > MAX_PROC) {
+        printf("Invalid input.\n");
+        return 1;
+    }
+
+    // Collect AT, BT, and Priority for each process
+    for (int i = 0; i < n; i++) {
+        printf("Enter AT, BT, and Priority (1 is highest) for P%d: ", i + 1);
+        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);
+    }
+
+    // Solve and run simulation
+    solve(n, at, bt, pr);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Input)" data-lang="c" data-title="3. SJF (User Input)">
+#include <stdio.h>
+
+#define MAX 20 // max process array can hold
+
+void solve(int n, int at[], int bt[], int pr[]) {
+
+    // VARIABLE DECLARE
+
+    // declare all variables that are in table 
+    // CT RT TAT WT Preemptions
+    int ct[MAX];
+    int rt[MAX];
+    int tat[MAX];
+    int wt[MAX];
+    int pre[MAX]; // preemption count tracker
+
+    // declare all variables to put in gantt chart
+    // gantt_pid , gantt_start , gantt_end , gc (ganttchart entry counter)
+    int gantt_pid[MAX * 2];
+    int gantt_start[MAX * 2];
+    int gantt_end[MAX * 2];
+    int gc = 0; // counts how many blocks recorded in gantt chart 
+
+    // declare all variables that track progress
+    int time = 0;
+    int completed = 0;
+    int cswitch = 0;
+    int done[MAX] = {0}; // done is array cause we need n done flags for n number of processes  
+
+    // extra tracking variables for preemptive execution
+    int rem[MAX];        // remaining burst time
+    for (int i = 0; i < n; i++) rem[i] = bt[i];
+    for (int i = 0; i < n; i++) rt[i] = -1; // -1 to track first start time for RT
+    int last_pid = -1;   // tracks process running in previous tick
+
+    // ------------------------------------------
+
+    // TICK-BY-TICK SIMULATION LOOP (Preemptive Priority)
+    while (completed < n) {
+        int idx = -1;            // index of chosen process (-1 is not assigned yet)
+        int min_pr = 99999;      // keep high so lower priority numbers (higher priority) replace it
+
+        // find which process has arrived + which has highest priority (lowest priority number)
+        for (int i = 0; i < n; i++) {
+            if (!done[i] && at[i] <= time) {
+                // check if priority is higher (smaller number)
+                if (pr[i] < min_pr || (pr[i] == min_pr && at[i] < at[idx])) {
+                    min_pr = pr[i];
+                    idx = i;     // process at ith index is now selected
+                }
+            }
+        }
+
+        // IF NO PROCESS ARRIVED, CPU IDLE FOR 1 TIME UNIT
+        if (idx == -1) {
+            gantt_pid[gc] = -1;  // put idle process (-1) in this gantt block
+            gantt_start[gc] = time;
+            gantt_end[gc] = time + 1;
+            time++;
+            gc++;
+            last_pid = -1;
+            continue;
+        }
+
+        // -------------------------------------------------------
+
+        // count context switch and preemption
+        if (last_pid != -1 && last_pid != idx) {
+            cswitch++;          // switched from a different process
+            if (rem[last_pid] > 0) {
+                pre[last_pid]++; // previous process was interrupted before finishing
+            }
+        }
+
+        // record response time on first execution touch
+        if (rt[idx] == -1) {
+            rt[idx] = time - at[idx];
+        }
+
+        // execute process for 1 time unit (tick)
+        gantt_pid[gc] = idx;
+        gantt_start[gc] = time;
+
+        time++;                 // advance system clock by 1 tick
+        rem[idx]--;             // decrease remaining burst time by 1
+
+        gantt_end[gc] = time;   // end time of this 1-tick block
+        gc++;                   // move to next gantt slot
+        last_pid = idx;         // update last running process
+
+        // check if process finished execution
+        if (rem[idx] == 0) {
+            ct[idx] = time;
+            tat[idx] = ct[idx] - at[idx];
+            wt[idx] = tat[idx] - bt[idx];
+            done[idx] = 1;
+            completed++;
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT EVERYTHING 
+
+    // 1. Print Top Border
+    printf("\nGantt Chart:\n+");
+    for (int i = 0; i < gc; i++) printf("------+");
+
+    // 2. Print Process Names / IDLE inside boxes
+    printf("\n|");
+    for (int i = 0; i < gc; i++) {
+        if (gantt_pid[i] == -1) {
+            printf(" IDLE |");
+        }
+        else {
+            printf("  P%-d |", gantt_pid[i] + 1);
+        } 
+    }
+
+    // 3. Print Bottom Border
+    printf("\n+");
+    for (int i = 0; i < gc; i++) printf("------+");
+
+    // 4. Print Timeline Numbers underneath
+    printf("\n%-d", gantt_start[0]);
+    for (int i = 0; i < gc; i++) {
+        printf("   %-d", gantt_end[i]);
+    }
+    printf("\n");
+
+    // Print process metrics table cleanly using tabs
+    printf("\nProcess\tAT\tBT\tPriority\tCT\tRT\tTAT\tWT\tPreempt\n");
+    printf("-------------------------------------------------------------------\n");
+
+    float sum_wt = 0.0f, sum_tat = 0.0f;
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], pr[i], ct[i], rt[i], tat[i], wt[i], pre[i]);
+        sum_wt += wt[i];
+        sum_tat += tat[i];
+    }
+
+    // Print Summary Averages & Context Switches
+    printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n); 
+    printf("Number of Context Switches = %d\n", cswitch);
+}
+
+int main(void) {
+    // take num of process, AT, BT, and Priority for those process and pass them to solve function
+
+    int n;             // no of process by user
+    int at[MAX];       // array to store AT
+    int bt[MAX];       // array to store BT
+    int pr[MAX];       // array to store Priority
+
+    // ask number of process
+    printf("Enter number of processes: ");
+    if (scanf("%d", &n) != 1 || n <= 0 || n > MAX) {
+        printf("Invalid input.\n");
+        return 1;
+    }
+
+    // collect AT, BT, and Priority
+    for (int i = 0; i < n; i++) {
+        printf("Enter AT, BT, and Priority (1 is highest) for P%d: ", i + 1);
+        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);    
+    }
+
+    // solve
+    solve(n, at, bt, pr);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Input)" data-lang="c" data-title="4. Banker's Algorithm (User Input)">
+#include <stdio.h>
+
+#define MAX_PROCESS 10
+#define MAX_RESOURCE 10
+
+void bankers(int processes, int resources, int allocation[MAX_PROCESS][MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int available[MAX_RESOURCE])
+{
+
+    // VARIABLE DECLARE
+    int need[MAX_PROCESS][MAX_RESOURCE]; // Need matrix = Max demand - Allocation
+    int work[MAX_RESOURCE];              // Work vector to track available resources during simulation
+    int finish[MAX_PROCESS] = {0};       // Finish array (0 = process not finished, 1 = finished safely)
+    int safe_seq[MAX_PROCESS];           // Array to store the safe execution sequence
+
+    int finished = 0; // Counts how many processes have successfully finished
+    int safe = 1;     // Flag to track if progress was made in the safety loop
+
+    // COMPUTE NEED MATRIX (Need = Max - Allocation)
+    for (int i = 0; i < processes; i++)
+    {
+        for (int j = 0; j < resources; j++)
+        {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+
+    // PRINT NEED MATRIX cleanly using tabs
+    printf("\nNeed Matrix:\nProcess\t");
+    for (int j = 0; j < resources; j++)
+    {
+        printf("R%-d\t", j + 1); // Fixed: print R1, R2, etc. based on column index
+    }
+    printf("\n----------------------------------------\n");
+    for (int i = 0; i < processes; i++)
+    {
+        printf("P%d\t", i + 1);
+        for (int j = 0; j < resources; j++)
+        {
+            printf("%d\t", need[i][j]);
+        }
+        printf("\n");
+    }
+
+    // ----------------------------------
+
+    // SAFETY CHECK ALGORITHM
+
+    // Copy available resources to work vector
+    for (int j = 0; j < resources; j++)
+    {
+        work[j] = available[j];
+    }
+
+    // Safety simulation loop
+    while (safe)
+    {
+        safe = 0; // Assume no process can run in this pass until proven otherwise
+
+        for (int i = 0; i < processes; i++)
+        {
+            // If process hasn't finished yet
+            if (!finish[i])
+            {
+                int can_allocate = 1; // Flag to check if resources are sufficient
+
+                // Check if all needed resources are less than or equal to available work
+                for (int j = 0; j < resources; j++)
+                {
+                    if (need[i][j] > work[j])
+                    {
+                        can_allocate = 0;
+                        break;
+                    }
+                }
+
+                // If feasible, simulate execution, reclaim allocated resources, and mark finished
+                if (can_allocate)
+                {
+                    for (int j = 0; j < resources; j++)
+                    {
+                        work[j] += allocation[i][j]; // Fixed: add allocated resources back to work pool
+                    }
+                    finish[i] = 1;            // Mark process as finished safely
+                    safe_seq[finished++] = i; // Record process index in safe sequence
+                    safe = 1;                 // Set progress flag to 1 so while loop continues
+                }
+            }
+        }
+    }
+
+    // PRINT RESULTS AND SAFE SEQUENCE
+    if (finished == processes)
+    {
+        printf("\nResult: System is in a SAFE State\nSafe Sequence: ");
+        for (int i = 0; i < processes; i++)
+        {
+            if (i > 0)
+                printf(" -> ");
+            printf("P%d", safe_seq[i] + 1); // Match 1-based indexing for display
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("\nResult: System is NOT in a safe state (Deadlock potential).\n");
+    }
+}
+
+int main(void)
+{
+    int processes; // Number of processes
+    int resources; // Number of resource types
+
+    int allocation[MAX_PROCESS][MAX_RESOURCE];
+    int max_need[MAX_PROCESS][MAX_RESOURCE];
+    int available[MAX_RESOURCE];
+
+    // Ask number of processes and resources
+    printf("Enter number of processes: ");
+    scanf("%d", &processes); // Fixed: added &
+
+    printf("Enter number of resource types: ");
+    scanf("%d", &resources); // Fixed: added &
+
+    // Collect allocation matrix
+    printf("Enter Allocation Matrix (%d x %d):\n", processes, resources);
+    for (int i = 0; i < processes; i++)
+    {
+        for (int j = 0; j < resources; j++)
+        {
+            scanf("%d", &allocation[i][j]);
+        }
+    }
+
+    // Collect max demand matrix
+    printf("Enter Max Demand Matrix (%d x %d):\n", processes, resources);
+    for (int i = 0; i < processes; i++)
+    {
+        for (int j = 0; j < resources; j++)
+        {
+            scanf("%d", &max_need[i][j]);
+        }
+    }
+
+    // Collect available resources vector
+    printf("Enter Available Resources (%d values): ", resources);
+    for (int j = 0; j < resources; j++)
+    {
+        scanf("%d", &available[j]);
+    }
+
+    // Pass all required matrices and vectors to bankers function
+    bankers(processes, resources, allocation, max_need, available);
+
+    return 0;
+}
+</script>
+
+<!-- ================= C PROGRAMS (HARDCODED) ================= -->
+
+<script type="text/plain" data-group="C Programs (Hardcoded)" data-lang="c" data-title="1. LRU Page Replacement (Hardcoded)">
+#include <stdio.h>
+
+#define MAX_FRAMES 10  // Max frames array can hold
+#define MAX_REFS 100   // Max page reference string length
+
+void lru_page_replacement(int pages[], int n, int capacity) {
+
+    // VARIABLE DECLARE
+
+    // declare all tracking arrays for frames and access timestamps
+    int frames[MAX_FRAMES];      // Stores page numbers currently loaded in memory
+    int last_used[MAX_FRAMES];   // Stores the timestamp/time of last access for each frame
+
+    // declare all variables that track progress and statistics
+    int frame_count = 0;         // Number of currently occupied frames
+    int page_faults = 0;         // Total page fault counter
+    int page_hits = 0;           // Total page hit counter
+
+    // Initialize all frames and timestamps to -1 (meaning empty)
+    for (int i = 0; i < capacity; i++) {
+        frames[i] = -1;
+        last_used[i] = -1;
+    }
+
+    // ------------------------------------------
+
+    // PRINT TABLE HEADER
+  // Print table header cleanly
+    printf("\nStep\tPage\t");
+    for (int i = 0; i < capacity; i++) {
+        printf("F%d\t", i + 1);
+    }
+    printf("Status\tEvicted\n");
+    printf("-------------------------------------------------------------------\n");
+    // ------------------------------------------
+
+    // SIMULATION LOOP: Process each page reference step-by-step over time
+    for (int time = 0; time < n; time++) {
+        int page = pages[time];       // Current page being referenced
+        int pos = -1;                 // Position if found in frames (-1 means not found)
+        int is_hit = 0;               // Flag for hit (1) or fault (0)
+        int replaced_page = -1;       // Tracks which page was evicted during a fault
+
+        // CHECK IF PAGE IS ALREADY IN MEMORY (PAGE HIT)
+        for (int j = 0; j < frame_count; j++) {
+            if (frames[j] == page) {
+                pos = j;
+                break;
+            }
+        }
+
+        // HANDLE HIT OR FAULT
+        if (pos != -1) {
+            // PAGE HIT: Page is already in memory, update its last used timestamp
+            last_used[pos] = time;
+            page_hits++;
+            is_hit = 1;
+        } else {
+            // PAGE FAULT: Page is not in memory, needs to be brought in
+            page_faults++;
+
+            // Case A: There is still an empty frame available
+            if (frame_count < capacity) {
+                frames[frame_count] = page;
+                last_used[frame_count] = time;
+                frame_count++;
+            } 
+            // Case B: Memory is full, must replace Least Recently Used (LRU) page
+            else {
+                // Find frame with the smallest last_used time (oldest access)
+                int lru_index = 0;
+                for (int j = 1; j < capacity; j++) {
+                    if (last_used[j] < last_used[lru_index]) {
+                        lru_index = j;
+                    }
+                }
+
+                replaced_page = frames[lru_index]; // Record evicted page for display
+                frames[lru_index] = page;          // Load new page into LRU slot
+                last_used[lru_index] = time;       // Update its timestamp
+            }
+        }
+
+        // ------------------------------------------
+
+        // PRINT CURRENT STEP ROW
+        printf("%-d\t%-d\t", time + 1, page);
+        for (int j = 0; j < capacity; j++) {
+            if (frames[j] == -1) printf("-\t");
+            else printf("%d\t", frames[j]);
+        }
+
+        if (is_hit) {
+            printf("Hit\t-\n");
+        } else {
+            if (replaced_page != -1) printf("Fault\tPage %d\n", replaced_page);
+            else printf("Fault\tNone\n");
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT SUMMARY STATISTICS
+    float hit_ratio = ((float)page_hits / n) * 100.0f;
+    float miss_ratio = ((float)page_faults / n) * 100.0f;
+
+    printf("\nTotal References : %d\n", n);
+    printf("Total Page Faults: %d\n", page_faults);
+    printf("Total Page Hits  : %d\n", page_hits);
+    printf("Hit Ratio        : %.2f%%\n", hit_ratio);
+    printf("Miss Ratio       : %.2f%%\n", miss_ratio);
+}
+
+int main(void) {
+    // HARDCODED INPUT: edit these values to test other cases
+    int capacity = 3;                                            // number of page frames
+    int pages[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2};       // page reference string
+    int n = sizeof(pages) / sizeof(pages[0]);                    // number of references
+
+    printf("Page frames: %d\n", capacity);
+
+    // Run simulation
+    lru_page_replacement(pages, n, capacity);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Hardcoded)" data-lang="c" data-title="2. Priority Preemptive (Hardcoded)">
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_PROC 20          // Max processes array can hold
+#define TIMELINE_LEN 500     // Max timeline length for tick-by-tick tracking
+
+void solve(int n, int at[], int bt[], int pr[]) {
+
+    // VARIABLE DECLARE
+
+    // declare all tracking and table metric arrays
+    int rem[MAX_PROC];        // Remaining CPU burst time (decrements each tick)
+    int ct[MAX_PROC];         // Completion time
+    int st[MAX_PROC];         // Start time (first time CPU dispatches the process)
+    int pre[MAX_PROC];        // Preemption count tracker
+
+    // declare timeline array to track running process ID at every single time tick
+    int tl[TIMELINE_LEN];     
+
+    // declare all variables that track progress and state
+    int time = 0;             // System clock starting at 0
+    int done = 0;             // Counter for how many processes have finished
+    int last = -1;            // Process ID that ran in the previous tick
+    int cs = 0;               // Total context switches counter
+
+    // init tracking arrays
+    for (int i = 0; i < n; i++) {
+        rem[i] = bt[i];       // Remaining time starts equal to burst time
+        st[i] = -1;           // -1 means process hasn't started yet
+        pre[i] = 0;           // Zero preemptions initially
+    }
+
+    // ------------------------------------------
+
+    // TICK-BY-TICK SIMULATION LOOP
+    // Runs every single clock tick until all processes are completed
+    while (done < n) {
+        int cur = -1; // Index of current highest priority process (-1 means none ready)
+
+        // Find arrived process with highest priority (lower number = higher priority)
+        // Tie-breaker: if priorities match, pick the one that arrived earlier
+        for (int i = 0; i < n; i++) {
+            if (at[i] <= time && rem[i] > 0) { // If process has arrived and still has work left
+                if (cur == -1 || pr[i] < pr[cur] || (pr[i] == pr[cur] && at[i] < at[cur])) {
+                    cur = i;
+                }
+            }
+        }
+
+        // IF NO PROCESS ARRIVED, CPU IS IDLE FOR 1 TIME UNIT
+        if (cur == -1) {
+            tl[time++] = -1; // -1 represents IDLE state in our timeline array
+            last = -1;       // Reset last running process tracker
+            continue;
+        }
+
+        // DETECT PREEMPTION AND CONTEXT SWITCH
+        // If a different process was running last tick, we have a context switch
+        if (last != -1 && last != cur) {
+            cs++;
+            if (rem[last] > 0) {
+                pre[last]++; // If the previous process still has work, it was preempted!
+            }
+        }
+
+        // RECORD FIRST START TIME (for Response Time calculation later)
+        if (st[cur] == -1) {
+            st[cur] = time; // Records the exact moment the process first touches the CPU
+        }
+
+        // EXECUTE PROCESS FOR 1 TIME UNIT
+        tl[time++] = cur;   // Log current process ID at this time tick
+        rem[cur]--;         // Decrease its remaining burst time by 1
+        last = cur;         // Update last running process tracker
+
+        // CHECK IF PROCESS FINISHED EXECUTION
+        if (rem[cur] == 0) {
+            ct[cur] = time; // Record completion time
+            done++;         // Increment completed process count
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT EVERYTHING
+
+    // 1. Render Merged Gantt Chart
+    printf("\nGantt Chart:\n");
+    for (int t = 0; t < time;) {
+        int p = tl[t];
+        while (t < time && tl[t] == p) t++;
+        if (p == -1) printf("| IDLE ");
+        else printf("| P%d ", p + 1);
+    }
+    printf("|\n0");
+
+    for (int t = 0; t < time;) {
+        int p = tl[t];
+        while (t < time && tl[t] == p) t++;
+        char cell[16];
+        if (p == -1) strcpy(cell, "| IDLE ");
+        else sprintf(cell, "| P%d ", p + 1);
+        printf("%*d", (int)strlen(cell), t);
+    }
+    printf("\n");
+
+    // 2. Print Per-Process Metrics Table
+    printf("\nProc\tAT\tBT\tPriority\tCT\tTAT\tWT\tRT\tPreemptions\n");
+    printf("-----------------------------------------------------------------------\n");
+
+    float sum_tat = 0.0f, sum_wt = 0.0f;
+    int max_wt = -1, max_rt = -1;
+    int max_wt_proc = 0, max_rt_proc = 0;
+
+    for (int i = 0; i < n; i++) {
+        int tat = ct[i] - at[i]; // Turnaround Time = Completion Time - Arrival Time
+        int wt = tat - bt[i];    // Waiting Time = Turnaround Time - Burst Time
+        int rt = st[i] - at[i];    // Response Time = First Start Time - Arrival Time
+
+        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], pr[i], ct[i], tat, wt, rt, pre[i]);
+
+        sum_tat += tat;
+        sum_wt += wt;
+
+        // Track maximum waiting time and response time
+        if (wt > max_wt) { max_wt = wt; max_wt_proc = i; }
+        if (rt > max_rt) { max_rt = rt; max_rt_proc = i; }
+    }
+
+    // 3. Print Summary Averages and Extremes
+    printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n);
+    printf("Number of Context Switches = %d\n", cs);
+    printf("Maximum WT                 = %d -> P%d\n", max_wt, max_wt_proc + 1);
+    printf("Maximum RT                 = %d -> P%d\n", max_rt, max_rt_proc + 1);
+}
+
+int main(void) {
+
+    // HARDCODED INPUT: edit these values to test other cases
+    // Priority: 1 is highest
+    int n = 4;                          // Number of processes
+    int at[MAX_PROC] = {0, 1, 2, 3};    // Arrival Times
+    int bt[MAX_PROC] = {5, 3, 4, 2};    // Burst Times
+    int pr[MAX_PROC] = {2, 1, 3, 4};    // Priorities
+
+    // Solve and run simulation
+    solve(n, at, bt, pr);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Hardcoded)" data-lang="c" data-title="3. SJF (Hardcoded)">
+#include <stdio.h>
+
+#define MAX 20 // max process array can hold
+
+void solve(int n, int at[], int bt[], int pr[]) {
+
+    // VARIABLE DECLARE
+
+    // declare all variables that are in table 
+    // CT RT TAT WT Preemptions
+    int ct[MAX];
+    int rt[MAX];
+    int tat[MAX];
+    int wt[MAX];
+    int pre[MAX]; // preemption count tracker
+
+    // declare all variables to put in gantt chart
+    // gantt_pid , gantt_start , gantt_end , gc (ganttchart entry counter)
+    int gantt_pid[MAX * 2];
+    int gantt_start[MAX * 2];
+    int gantt_end[MAX * 2];
+    int gc = 0; // counts how many blocks recorded in gantt chart 
+
+    // declare all variables that track progress
+    int time = 0;
+    int completed = 0;
+    int cswitch = 0;
+    int done[MAX] = {0}; // done is array cause we need n done flags for n number of processes  
+
+    // extra tracking variables for preemptive execution
+    int rem[MAX];        // remaining burst time
+    for (int i = 0; i < n; i++) rem[i] = bt[i];
+    for (int i = 0; i < n; i++) rt[i] = -1; // -1 to track first start time for RT
+    for (int i = 0; i < n; i++) pre[i] = 0;  // init preemption counters
+    int last_pid = -1;   // tracks process running in previous tick
+
+    // ------------------------------------------
+
+    // TICK-BY-TICK SIMULATION LOOP (Preemptive Priority)
+    while (completed < n) {
+        int idx = -1;            // index of chosen process (-1 is not assigned yet)
+        int min_pr = 99999;      // keep high so lower priority numbers (higher priority) replace it
+
+        // find which process has arrived + which has highest priority (lowest priority number)
+        for (int i = 0; i < n; i++) {
+            if (!done[i] && at[i] <= time) {
+                // check if priority is higher (smaller number)
+                if (pr[i] < min_pr || (pr[i] == min_pr && at[i] < at[idx])) {
+                    min_pr = pr[i];
+                    idx = i;     // process at ith index is now selected
+                }
+            }
+        }
+
+        // IF NO PROCESS ARRIVED, CPU IDLE FOR 1 TIME UNIT
+        if (idx == -1) {
+            gantt_pid[gc] = -1;  // put idle process (-1) in this gantt block
+            gantt_start[gc] = time;
+            gantt_end[gc] = time + 1;
+            time++;
+            gc++;
+            last_pid = -1;
+            continue;
+        }
+
+        // -------------------------------------------------------
+
+        // count context switch and preemption
+        if (last_pid != -1 && last_pid != idx) {
+            cswitch++;          // switched from a different process
+            if (rem[last_pid] > 0) {
+                pre[last_pid]++; // previous process was interrupted before finishing
+            }
+        }
+
+        // record response time on first execution touch
+        if (rt[idx] == -1) {
+            rt[idx] = time - at[idx];
+        }
+
+        // execute process for 1 time unit (tick)
+        gantt_pid[gc] = idx;
+        gantt_start[gc] = time;
+
+        time++;                 // advance system clock by 1 tick
+        rem[idx]--;             // decrease remaining burst time by 1
+
+        gantt_end[gc] = time;   // end time of this 1-tick block
+        gc++;                   // move to next gantt slot
+        last_pid = idx;         // update last running process
+
+        // check if process finished execution
+        if (rem[idx] == 0) {
+            ct[idx] = time;
+            tat[idx] = ct[idx] - at[idx];
+            wt[idx] = tat[idx] - bt[idx];
+            done[idx] = 1;
+            completed++;
+        }
+    }
+
+    // -------------------------------------------
+
+    // PRINT EVERYTHING 
+
+    // 1. Print Top Border
+    printf("\nGantt Chart:\n+");
+    for (int i = 0; i < gc; i++) printf("------+");
+
+    // 2. Print Process Names / IDLE inside boxes
+    printf("\n|");
+    for (int i = 0; i < gc; i++) {
+        if (gantt_pid[i] == -1) {
+            printf(" IDLE |");
+        }
+        else {
+            printf("  P%-d |", gantt_pid[i] + 1);
+        } 
+    }
+
+    // 3. Print Bottom Border
+    printf("\n+");
+    for (int i = 0; i < gc; i++) printf("------+");
+
+    // 4. Print Timeline Numbers underneath
+    printf("\n%-d", gantt_start[0]);
+    for (int i = 0; i < gc; i++) {
+        printf("   %-d", gantt_end[i]);
+    }
+    printf("\n");
+
+    // Print process metrics table cleanly using tabs
+    printf("\nProcess\tAT\tBT\tPriority\tCT\tRT\tTAT\tWT\tPreempt\n");
+    printf("-------------------------------------------------------------------\n");
+
+    float sum_wt = 0.0f, sum_tat = 0.0f;
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], pr[i], ct[i], rt[i], tat[i], wt[i], pre[i]);
+        sum_wt += wt[i];
+        sum_tat += tat[i];
+    }
+
+    // Print Summary Averages & Context Switches
+    printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n); 
+    printf("Number of Context Switches = %d\n", cswitch);
+}
+
+int main(void) {
+    // HARDCODED INPUT: edit these values to test other cases
+    // Priority: 1 is highest
+    int n = 4;                          // no of process
+    int at[MAX] = {0, 1, 2, 3};         // Arrival Times
+    int bt[MAX] = {6, 4, 3, 2};         // Burst Times
+    int pr[MAX] = {3, 1, 4, 2};         // Priorities
+
+    // solve
+    solve(n, at, bt, pr);
+    return 0;
+}
+</script>
+
+<script type="text/plain" data-group="C Programs (Hardcoded)" data-lang="c" data-title="4. Banker's Algorithm (Hardcoded)">
+#include <stdio.h>
+
+#define MAX_PROCESS 10
+#define MAX_RESOURCE 10
+
+void bankers(int processes, int resources, int allocation[MAX_PROCESS][MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int available[MAX_RESOURCE])
+{
+
+    // VARIABLE DECLARE
+    int need[MAX_PROCESS][MAX_RESOURCE]; // Need matrix = Max demand - Allocation
+    int work[MAX_RESOURCE];              // Work vector to track available resources during simulation
+    int finish[MAX_PROCESS] = {0};       // Finish array (0 = process not finished, 1 = finished safely)
+    int safe_seq[MAX_PROCESS];           // Array to store the safe execution sequence
+
+    int finished = 0; // Counts how many processes have successfully finished
+    int safe = 1;     // Flag to track if progress was made in the safety loop
+
+    // COMPUTE NEED MATRIX (Need = Max - Allocation)
+    for (int i = 0; i < processes; i++)
+    {
+        for (int j = 0; j < resources; j++)
+        {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+
+    // PRINT NEED MATRIX cleanly using tabs
+    printf("\nNeed Matrix:\nProcess\t");
+    for (int j = 0; j < resources; j++)
+    {
+        printf("R%-d\t", j + 1); // Fixed: print R1, R2, etc. based on column index
+    }
+    printf("\n----------------------------------------\n");
+    for (int i = 0; i < processes; i++)
+    {
+        printf("P%d\t", i + 1);
+        for (int j = 0; j < resources; j++)
+        {
+            printf("%d\t", need[i][j]);
+        }
+        printf("\n");
+    }
+
+    // ----------------------------------
+
+    // SAFETY CHECK ALGORITHM
+
+    // Copy available resources to work vector
+    for (int j = 0; j < resources; j++)
+    {
+        work[j] = available[j];
+    }
+
+    // Safety simulation loop
+    while (safe)
+    {
+        safe = 0; // Assume no process can run in this pass until proven otherwise
+
+        for (int i = 0; i < processes; i++)
+        {
+            // If process hasn't finished yet
+            if (!finish[i])
+            {
+                int can_allocate = 1; // Flag to check if resources are sufficient
+
+                // Check if all needed resources are less than or equal to available work
+                for (int j = 0; j < resources; j++)
+                {
+                    if (need[i][j] > work[j])
+                    {
+                        can_allocate = 0;
+                        break;
+                    }
+                }
+
+                // If feasible, simulate execution, reclaim allocated resources, and mark finished
+                if (can_allocate)
+                {
+                    for (int j = 0; j < resources; j++)
+                    {
+                        work[j] += allocation[i][j]; // Fixed: add allocated resources back to work pool
+                    }
+                    finish[i] = 1;            // Mark process as finished safely
+                    safe_seq[finished++] = i; // Record process index in safe sequence
+                    safe = 1;                 // Set progress flag to 1 so while loop continues
+                }
+            }
+        }
+    }
+
+    // PRINT RESULTS AND SAFE SEQUENCE
+    if (finished == processes)
+    {
+        printf("\nResult: System is in a SAFE State\nSafe Sequence: ");
+        for (int i = 0; i < processes; i++)
+        {
+            if (i > 0)
+                printf(" -> ");
+            printf("P%d", safe_seq[i] + 1); // Match 1-based indexing for display
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("\nResult: System is NOT in a safe state (Deadlock potential).\n");
+    }
+}
+
+int main(void)
+{
+    // HARDCODED INPUT: edit these values to test other cases
+    int processes = 5; // Number of processes
+    int resources = 3; // Number of resource types
+
+    int allocation[MAX_PROCESS][MAX_RESOURCE] = {
+        {0, 1, 0},
+        {2, 0, 0},
+        {3, 0, 2},
+        {2, 1, 1},
+        {0, 0, 2}
+    };
+
+    int max_need[MAX_PROCESS][MAX_RESOURCE] = {
+        {7, 5, 3},
+        {3, 2, 2},
+        {9, 0, 2},
+        {2, 2, 2},
+        {4, 3, 3}
+    };
+
+    int available[MAX_RESOURCE] = {3, 3, 2};
+
+    // Pass all required matrices and vectors to bankers function
+    bankers(processes, resources, allocation, max_need, available);
+
+    return 0;
+}
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var RUN_INFO = {
+    "Shell Scripts": ["chmod +x filename.sh", "./filename.sh"],
+    "C Programs (Input)": ["gcc filename.c -o filename", "./filename"],
+    "C Programs (Hardcoded)": ["gcc filename.c -o filename", "./filename"]
+  };
+
+  var main = document.getElementById("main");
+  var side = document.getElementById("side");
+  var empty = document.getElementById("empty");
+  var q = document.getElementById("q");
+  var toast = document.getElementById("toast");
+  var sections = [];
+  var tree = document.getElementById("tree");
+  var FOLDER_ICON = '<svg class="ico" viewBox="0 0 18 18"><path d="M1.5 4.2c0-.7.6-1.2 1.2-1.2h4l1.6 1.8h7c.7 0 1.2.5 1.2 1.2v7.6c0 .7-.5 1.2-1.2 1.2H2.7c-.7 0-1.2-.5-1.2-1.2z" fill="#3584e4"/><path d="M1.5 6.8h15v6.8c0 .7-.5 1.2-1.2 1.2H2.7c-.7 0-1.2-.5-1.2-1.2z" fill="#62a0ea"/></svg>';
+  var FILE_ICON = '<svg class="ico" viewBox="0 0 18 18"><path d="M4 1.5h6.5L14.5 5.5v10.2c0 .5-.4.8-.8.8H4.3c-.5 0-.8-.4-.8-.8V2.3c0-.5.3-.8.5-.8z" fill="#f6f5f4" stroke="#9a9996" stroke-width="1"/><path d="M10.5 1.5v4h4" fill="#deddda" stroke="#9a9996" stroke-width="1"/><path d="M6 8.5h6M6 10.5h6M6 12.5h4" stroke="#9a9996" stroke-width="1"/></svg>';
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  /* ---------- Simple syntax highlighting (per line) ---------- */
+  var BASH_KW = "if then else elif fi for while until do done case esac in function break continue exit return";
+  var BASH_BI = "echo read printf let cd ls pwd mkdir rmdir rm cp mv touch cat head tail sort cut chmod wc bc tty who ps history time date top expr tr grep command true false test local export";
+  var C_KW = "if else for while do break continue return switch case default sizeof static const struct typedef";
+  var C_TY = "int float char void double long short unsigned FILE";
+
+  function set(str) {
+    var o = {};
+    str.split(" ").forEach(function (w) { o[w] = 1; });
+    return o;
+  }
+  var bashKw = set(BASH_KW), bashBi = set(BASH_BI), cKw = set(C_KW), cTy = set(C_TY);
+
+  var bashRe = /(^|\s)(#.*)$|("(?:\\.|[^"\\])*")|('[^']*')|(\$\{[^}]*\}|\$\(\(|\$\(|\$[A-Za-z_]\w*|\$[?#@*0-9])|(\b\d+(?:\.\d+)?\b)|([A-Za-z_][\w-]*)/g;
+  var cRe = /(\/\/.*$|\/\*.*?\*\/)|(^\s*#\s*\w+)|("(?:\\.|[^"\\])*")|(\b\d+(?:\.\d+)?f?\b)|([A-Za-z_]\w*)/g;
+
+  function hlBash(line) {
+    var out = "", last = 0, m;
+    bashRe.lastIndex = 0;
+    while ((m = bashRe.exec(line)) !== null) {
+      out += esc(line.slice(last, m.index));
+      if (m[2] !== undefined) {
+        out += esc(m[1]) + '<span class="c">' + esc(m[2]) + "</span>";
+      } else if (m[3] !== undefined || m[4] !== undefined) {
+        out += '<span class="s">' + esc(m[0]) + "</span>";
+      } else if (m[5] !== undefined) {
+        out += '<span class="v">' + esc(m[0]) + "</span>";
+      } else if (m[6] !== undefined) {
+        out += '<span class="n">' + esc(m[0]) + "</span>";
+      } else if (m[7] !== undefined) {
+        if (bashKw[m[7]]) out += '<span class="k">' + esc(m[7]) + "</span>";
+        else if (bashBi[m[7]]) out += '<span class="t">' + esc(m[7]) + "</span>";
+        else out += esc(m[0]);
+      }
+      last = m.index + m[0].length;
+      if (m[0].length === 0) bashRe.lastIndex++;
+    }
+    return out + esc(line.slice(last));
+  }
+
+  function hlC(line) {
+    var out = "", last = 0, m;
+    cRe.lastIndex = 0;
+    while ((m = cRe.exec(line)) !== null) {
+      out += esc(line.slice(last, m.index));
+      if (m[1] !== undefined) out += '<span class="c">' + esc(m[0]) + "</span>";
+      else if (m[2] !== undefined) out += '<span class="k">' + esc(m[0]) + "</span>";
+      else if (m[3] !== undefined) out += '<span class="s">' + esc(m[0]) + "</span>";
+      else if (m[4] !== undefined) out += '<span class="n">' + esc(m[0]) + "</span>";
+      else if (m[5] !== undefined) {
+        if (cKw[m[5]]) out += '<span class="k">' + esc(m[5]) + "</span>";
+        else if (cTy[m[5]]) out += '<span class="t">' + esc(m[5]) + "</span>";
+        else out += esc(m[0]);
+      }
+      last = m.index + m[0].length;
+    }
+    return out + esc(line.slice(last));
+  }
+
+  /* ---------- Clipboard ---------- */
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast.t);
+    showToast.t = setTimeout(function () { toast.classList.remove("show"); }, 1600);
+  }
+  function copyText(text, okMsg) {
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); showToast(okMsg); } catch (e) { showToast("Copy failed"); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { showToast(okMsg); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  /* ---------- Build page ---------- */
+  var scripts = document.querySelectorAll('script[type="text/plain"]');
+  var groups = {}, groupOrder = [];
+  scripts.forEach(function (s, i) {
+    var g = s.getAttribute("data-group");
+    if (!groups[g]) { groups[g] = []; groupOrder.push(g); }
+    var code = s.textContent.replace(/^\n/, "").replace(/\s+$/, "") + "\n";
+    groups[g].push({
+      id: "p" + (i + 1),
+      group: g,
+      lang: s.getAttribute("data-lang"),
+      title: s.getAttribute("data-title"),
+      code: code
+    });
+  });
+
+  groupOrder.forEach(function (g) {
+    var h = document.createElement("h2");
+    h.className = "group-title";
+    h.id = "g-" + g.replace(/\W+/g, "-").toLowerCase();
+    h.textContent = g;
+    main.insertBefore(h, empty);
+
+    var run = document.createElement("div");
+    run.className = "run";
+    run.innerHTML = "<b>How to run</b>" + RUN_INFO[g].map(function (c) { return "<div>" + esc(c) + "</div>"; }).join("");
+    main.insertBefore(run, empty);
+
+    var sh = document.createElement("div");
+    sh.className = "folder";
+    sh.setAttribute("data-group", g);
+    sh.innerHTML = '<div class="row"><svg class="arrow" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>' + FOLDER_ICON + '<span>' + esc(g) + '</span></div>';
+    var kids = document.createElement("div");
+    kids.className = "kids";
+    sh.appendChild(kids);
+    sh.firstChild.addEventListener("click", function () { sh.classList.toggle("collapsed"); });
+    tree.appendChild(sh);
+
+    groups[g].forEach(function (p) {
+      var card = document.createElement("section");
+      card.className = "card";
+      card.id = p.id;
+
+      var head = document.createElement("div");
+      head.className = "card-head";
+      head.innerHTML = '<h3>' + esc(p.title) + '</h3><span class="badge">' + (p.lang === "c" ? "C" : "Bash") + '</span>';
+      var btn = document.createElement("button");
+      btn.textContent = "Copy code";
+      btn.addEventListener("click", function () {
+        copyText(p.code, "Copied: " + p.title);
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy code"; }, 1500);
+      });
+      head.appendChild(btn);
+
+      var wrap = document.createElement("div");
+      wrap.className = "code-wrap";
+      var pre = document.createElement("pre");
+      pre.className = "code";
+      var lines = p.code.replace(/\n$/, "").split("\n");
+      var lineEls = [];
+      lines.forEach(function (ln, idx) {
+        var d = document.createElement("span");
+        d.className = "line";
+        d.innerHTML = (p.lang === "c" ? hlC(ln) : hlBash(ln)) || "";
+        d.addEventListener("click", function () {
+          var old = pre.querySelector(".cur");
+          if (old) old.classList.remove("cur");
+          d.classList.add("cur");
+          var col = 1;
+          try {
+            var sel = window.getSelection();
+            if (sel && sel.anchorNode && d.contains(sel.anchorNode)) {
+              var r = document.createRange();
+              r.setStart(d, 0);
+              r.setEnd(sel.anchorNode, sel.anchorOffset);
+              col = r.toString().length + 1;
+            }
+          } catch (e) {}
+          status.querySelector(".pos").textContent = "Ln " + (idx + 1) + ", Col " + col;
+        });
+        pre.appendChild(d);
+        lineEls.push({ el: d, text: ln.toLowerCase() });
+      });
+      wrap.appendChild(pre);
+
+      var status = document.createElement("div");
+      status.className = "statusbar";
+      status.innerHTML = '<span class="run-info">Run: ' + esc(RUN_INFO[p.group].join("  &&  ")) + '</span>' +
+        '<span>' + (p.lang === "c" ? "C" : "sh") + ' &#8964;</span>' +
+        '<span class="tw">Tab Width: 4 &#8964;</span>' +
+        '<span class="pos">Ln 1, Col 1</span><span>INS</span>';
+
+      card.appendChild(head);
+      card.appendChild(wrap);
+      card.appendChild(status);
+      main.insertBefore(card, empty);
+
+      var link = document.createElement("a");
+      link.href = "#" + p.id;
+      link.innerHTML = FILE_ICON + "<span>" + esc(p.title) + "</span>";
+      link.setAttribute("data-id", p.id);
+      link.addEventListener("click", function (e) { e.preventDefault(); show(p.id); side.classList.remove("open"); });
+      kids.appendChild(link);
+
+      sections.push({
+        data: p, card: card, link: link, lines: lineEls,
+        hay: (p.title + "\n" + p.code).toLowerCase(),
+        heading: sh
+      });
+    });
+  });
+
+  /* ---------- Search ---------- */
+  function applySearch() {
+    var term = q.value.trim().toLowerCase();
+    var shown = 0;
+    var groupShown = {};
+    sections.forEach(function (s) {
+      var match = !term || s.hay.indexOf(term) !== -1;
+      s.card.classList.toggle("hidden", !match);
+      s.link.classList.toggle("hidden", !match);
+      s.lines.forEach(function (l) {
+        l.el.classList.toggle("hit", !!term && l.text.indexOf(term) !== -1);
+      });
+      if (match) {
+        shown++;
+        groupShown[s.data.group] = (groupShown[s.data.group] || 0) + 1;
+      }
+    });
+    document.querySelectorAll(".group-title").forEach(function (h) {
+      var name = h.textContent;
+      var vis = !!groupShown[name];
+      h.style.display = vis ? "" : "none";
+      h.nextElementSibling.style.display = vis ? "" : "none";
+    });
+    tree.querySelectorAll(".folder").forEach(function (f) {
+      f.style.display = groupShown[f.getAttribute("data-group")] ? "" : "none";
+      if (term && groupShown[f.getAttribute("data-group")]) f.classList.remove("collapsed");
+    });
+    empty.style.display = shown ? "none" : "block";
+    var vis = sections.filter(function (s) { return !s.card.classList.contains("hidden"); });
+    if (!vis.length) {
+      sections.forEach(function (s) { s.card.classList.remove("current"); s.link.classList.remove("active"); });
+      current = null;
+    } else if (!current || current.card.classList.contains("hidden")) {
+      show(vis[0].data.id);
+    } else if (term) {
+      show(current.data.id);
+    }
+  }
+  q.addEventListener("input", applySearch);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && document.activeElement !== q) {
+      e.preventDefault();
+      q.focus();
+    } else if (e.key === "Escape" && document.activeElement === q) {
+      q.value = "";
+      applySearch();
+      q.blur();
+    }
+  });
+
+  /* ---------- Copy all ---------- */
+  document.getElementById("copyAll").addEventListener("click", function () {
+    var out = sections.map(function (s) {
+      var c = s.data.lang === "c" ? "//" : "#";
+      var bar = c + " ==================================================\n";
+      return bar + c + " " + s.data.group + " - " + s.data.title + "\n" + bar + "\n" + s.data.code;
+    }).join("\n\n");
+    copyText(out, "Copied all " + sections.length + " programs");
+  });
+
+  /* ---------- Theme ---------- */
+  var themeBtn = document.getElementById("theme");
+  function setTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    themeBtn.innerHTML = t === "dark" ? "&#9728; <span class=\"lbl\">Light</span>" : "&#9790; <span class=\"lbl\">Dark</span>";
+    try { localStorage.setItem("codeRefTheme", t); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("codeRefTheme"); } catch (e) {}
+  if (!saved) saved = "light";
+  setTheme(saved);
+  themeBtn.addEventListener("click", function () {
+    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+
+  /* ---------- File browser nav buttons ---------- */
+  function visibleSections() {
+    return sections.filter(function (s) { return !s.card.classList.contains("hidden"); });
+  }
+  function step(d) {
+    var v = visibleSections();
+    var i = -1;
+    v.forEach(function (s, k) { if (s.link.classList.contains("active")) i = k; });
+    var n = v[Math.min(v.length - 1, Math.max(0, i + d))];
+    if (n) show(n.data.id);
+  }
+  document.getElementById("navBack").addEventListener("click", function () { step(-1); });
+  document.getElementById("navFwd").addEventListener("click", function () { step(1); });
+  document.getElementById("navUp").addEventListener("click", function () { if (current) current.card.querySelector(".code-wrap").scrollTo({ top: 0, behavior: "smooth" }); });
+  document.getElementById("navRoot").addEventListener("click", function () {
+    var fs = tree.querySelectorAll(".folder");
+    var anyOpen = Array.prototype.some.call(fs, function (f) { return !f.classList.contains("collapsed"); });
+    fs.forEach(function (f) { f.classList.toggle("collapsed", anyOpen); });
+  });
+
+  /* ---------- Mobile sidebar ---------- */
+  document.getElementById("menu").addEventListener("click", function () {
+    side.classList.toggle("open");
+  });
+
+  /* ---------- Show one program at a time ---------- */
+  var current = null;
+  function show(id) {
+    var t = null;
+    sections.forEach(function (s) { if (s.data.id === id) t = s; });
+    if (!t) return;
+    sections.forEach(function (s) {
+      var on = s === t;
+      s.card.classList.toggle("current", on);
+      s.link.classList.toggle("active", on);
+    });
+    current = t;
+    var wrap = t.card.querySelector(".code-wrap");
+    wrap.scrollTop = 0;
+    wrap.scrollLeft = 0;
+    var firstHit = t.card.querySelector(".line.hit");
+    if (firstHit) wrap.scrollTop = Math.max(0, firstHit.offsetTop - 80);
+    try { history.replaceState(null, "", "#" + id); } catch (e) {}
+  }
+  var startId = (location.hash || "").slice(1);
+  var okStart = sections.some(function (s) { return s.data.id === startId; });
+  show(okStart ? startId : sections[0].data.id);
+})();
+</script>
+</body>
+</html>
