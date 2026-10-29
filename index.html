@@ -325,6 +325,36 @@ body.sb-hidden main { margin-left: 0; }
   .hb-title b { text-align: center; }
   main { padding-top: 50px; }
 }
+/* ===== Find box ===== */
+mark.m { background: #fce94f99; color: inherit; padding: 0; border-radius: 2px; }
+mark.m.cur { background: #f57900; color: #fff; outline: 2px solid #f5790066; }
+#findBox {
+  position: fixed; top: 106px; right: 24px; width: 352px; max-width: calc(100vw - 24px);
+  padding: 10px; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.22); z-index: 30;
+}
+#findBox[hidden] { display: none; }
+.fx-row { display: flex; align-items: center; gap: 8px; }
+.fx-in { flex: 1; min-width: 0; position: relative; }
+.fx-in svg { position: absolute; left: 9px; top: 9px; width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; }
+.fx-in input {
+  width: 100%; height: 32px; padding: 0 8px 0 29px; font-size: 14px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 5px; outline: none;
+}
+.fx-in input:focus { border-color: var(--accent); }
+.fx-seg { display: inline-flex; flex: none; }
+#findBox button {
+  height: 32px; width: 34px; padding: 0; background: var(--hbtn); color: var(--text);
+  border: 1px solid var(--hbtn-border); display: inline-flex; align-items: center; justify-content: center;
+}
+#findBox button:hover { filter: brightness(.96); background: var(--hbtn); }
+#findBox button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#findPrev { border-radius: 6px 0 0 6px; }
+#findNext { border-radius: 0 6px 6px 0; border-left: 0; }
+#findBox .fx-x { border: 0; background: transparent; width: 28px; border-radius: 6px; flex: none; }
+#findBox .fx-x:hover { background: var(--fb-hover); }
+.fx-count { margin-top: 8px; padding-left: 2px; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -375,6 +405,21 @@ body.sb-hidden main { margin-left: 0; }
 <main id="main">
   <div id="empty">No programs match your search.</div>
 </main>
+
+<div id="findBox" hidden role="search" aria-label="Find in programs">
+  <div class="fx-row">
+    <div class="fx-in">
+      <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      <input id="findInput" type="search" placeholder="Search..." autocomplete="off" aria-label="Search keyword">
+    </div>
+    <div class="fx-seg">
+      <button id="findPrev" title="Previous match (Shift+Enter)" aria-label="Previous match"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button>
+      <button id="findNext" title="Next match (Enter)" aria-label="Next match"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+    </div>
+    <button id="findClose" class="fx-x" title="Close (Esc)" aria-label="Close"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div id="findCount" class="fx-count"></div>
+</div>
 
 <div id="toast"></div>
 
@@ -2699,7 +2744,7 @@ int main(void)
           status.querySelector(".pos").textContent = "Ln " + (idx + 1) + ", Col " + col;
         });
         pre.appendChild(d);
-        lineEls.push({ el: d, text: ln.toLowerCase() });
+        lineEls.push({ el: d, text: ln.toLowerCase(), html: d.innerHTML, marked: false });
       });
       wrap.appendChild(pre);
 
@@ -2740,7 +2785,10 @@ int main(void)
       s.card.classList.toggle("hidden", !match);
       s.link.classList.toggle("hidden", !match);
       s.lines.forEach(function (l) {
-        l.el.classList.toggle("hit", !!term && l.text.indexOf(term) !== -1);
+        var has = !!term && l.text.indexOf(term) !== -1;
+        l.el.classList.toggle("hit", has);
+        if (l.marked) { l.el.innerHTML = l.html; l.marked = false; }
+        if (has) l.marked = markLine(l.el, term);
       });
       if (match) {
         shown++;
@@ -2767,6 +2815,7 @@ int main(void)
     } else if (term) {
       show(current.data.id);
     }
+    rebuildMatches(term);
   }
   q.addEventListener("input", applySearch);
   document.addEventListener("keydown", function (e) {
@@ -2866,6 +2915,119 @@ int main(void)
     show(sections[0].data.id);
   });
 
+  /* ---------- Find box: jump between matches ---------- */
+  var matches = [], mi = -1, findDismissed = false;
+  var findBox = document.getElementById("findBox");
+  var findInput = document.getElementById("findInput");
+  var findCount = document.getElementById("findCount");
+
+  function markLine(el, term) {
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    var nodes = [], any = false;
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (n) {
+      var t = n.nodeValue, low = t.toLowerCase(), i = low.indexOf(term);
+      if (i < 0) return;
+      var frag = document.createDocumentFragment(), last = 0;
+      while (i >= 0) {
+        frag.appendChild(document.createTextNode(t.slice(last, i)));
+        var m = document.createElement("mark");
+        m.className = "m";
+        m.textContent = t.slice(i, i + term.length);
+        frag.appendChild(m);
+        any = true;
+        last = i + term.length;
+        i = low.indexOf(term, last);
+      }
+      frag.appendChild(document.createTextNode(t.slice(last)));
+      n.parentNode.replaceChild(frag, n);
+    });
+    return any;
+  }
+
+  function reveal(el, sec) {
+    var wrap = sec.card.querySelector(".code-wrap");
+    var r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+    wrap.scrollTop += (r.top - w.top) - w.height / 2;
+    if (r.left < w.left + 90 || r.right > w.right - 330) wrap.scrollLeft += (r.left - w.left) - 160;
+  }
+
+  function updateFindUI() {
+    var term = q.value.trim();
+    var visible = term && !findDismissed && (matches.length > 1 || document.activeElement === findInput);
+    findBox.hidden = !visible;
+    if (!matches.length) { findCount.textContent = term ? "No matches" : ""; return; }
+    var secs = {}, n = 0;
+    matches.forEach(function (m) { if (!secs[m.sec.data.id]) { secs[m.sec.data.id] = 1; n++; } });
+    findCount.textContent = (mi + 1) + " of " + matches.length + " matches" + (n > 1 ? " in " + n + " programs" : "");
+  }
+
+  function go(i) {
+    if (!matches.length) return;
+    i = (i + matches.length) % matches.length;
+    var t = matches[i];
+    if (t.sec !== current) show(t.sec.data.id);
+    if (mi >= 0 && matches[mi]) matches[mi].el.classList.remove("cur");
+    mi = i;
+    t.el.classList.add("cur");
+    reveal(t.el, t.sec);
+    updateFindUI();
+  }
+
+  function rebuildMatches(term) {
+    findDismissed = false;
+    matches = [];
+    mi = -1;
+    if (term) {
+      sections.forEach(function (s) {
+        if (s.card.classList.contains("hidden")) return;
+        s.card.querySelectorAll("mark.m").forEach(function (m) { matches.push({ sec: s, el: m }); });
+      });
+    }
+    if (document.activeElement !== findInput) findInput.value = q.value;
+    if (matches.length) {
+      var idx = 0;
+      for (var i = 0; i < matches.length; i++) {
+        if (current && matches[i].sec === current) { idx = i; break; }
+      }
+      go(idx);
+    }
+    updateFindUI();
+  }
+
+  function syncFindToCurrent() {
+    if (!matches.length || !current) return;
+    if (mi >= 0 && matches[mi] && matches[mi].sec === current) return;
+    for (var i = 0; i < matches.length; i++) {
+      if (matches[i].sec === current) {
+        if (mi >= 0 && matches[mi]) matches[mi].el.classList.remove("cur");
+        mi = i;
+        matches[i].el.classList.add("cur");
+        updateFindUI();
+        break;
+      }
+    }
+  }
+
+  document.getElementById("findNext").addEventListener("click", function () { go(mi + 1); });
+  document.getElementById("findPrev").addEventListener("click", function () { go(mi - 1); });
+  document.getElementById("findClose").addEventListener("click", function () { findDismissed = true; updateFindUI(); });
+  findInput.addEventListener("input", function () { q.value = findInput.value; applySearch(); });
+  findInput.addEventListener("focus", updateFindUI);
+  findInput.addEventListener("blur", function () { setTimeout(updateFindUI, 0); });
+  [q, findInput].forEach(function (inp) {
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (matches.length) go(mi + (e.shiftKey ? -1 : 1));
+      } else if (e.key === "Escape" && inp === findInput) {
+        findDismissed = true;
+        findInput.blur();
+        updateFindUI();
+      }
+    });
+  });
+
   /* ---------- Show one program at a time ---------- */
   var current = null;
   function show(id) {
@@ -2886,6 +3048,7 @@ int main(void)
     var firstHit = t.card.querySelector(".line.hit");
     if (firstHit) wrap.scrollTop = Math.max(0, firstHit.offsetTop - 80);
     try { history.replaceState(null, "", "#" + id); } catch (e) {}
+    syncFindToCurrent();
   }
   var startId = (location.hash || "").slice(1);
   var okStart = sections.some(function (s) { return s.data.id === startId; });
