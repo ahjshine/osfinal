@@ -6,355 +6,159 @@
 <title>Shell and C Code Reference</title>
 <style>
 :root {
-  --bg: #ffffff;
-  --panel: #f6f5f4;
-  --panel-2: #eeeeec;
-  --border: #d3d7cf;
-  --text: #2e3436;
-  --muted: #6b7075;
-  --accent: #3584e4;
-  --accent-text: #ffffff;
-  --gutter: #eeeeec;
-  --gutter-text: #888a85;
-  --line-hl: #eeeeec;
-  --hit: #fce94f55;
-  --c-kw: #a40000;
-  --c-com: #3465a4;
-  --c-str: #ad7fa8;
-  --c-num: #ad7fa8;
-  --c-type: #4e9a06;
-  --c-var: #c4a000;
-  --shadow: 0 1px 2px rgba(0,0,0,.08);
+  --bg:#ffffff; --panel:#f6f5f4; --panel-2:#eeeeec; --border:#cdc7c2;
+  --text:#2e3436; --muted:#77767b; --accent:#3584e4; --accent-text:#ffffff;
+  --gutter:#f6f5f4; --gutter-text:#6d6e70; --line-hl:#eeeeec; --hit:#fce94f55;
+  --hdr:#e1dedb; --hbtn:#f6f5f4; --hbtn-border:#cdc7c2; --tab-on:#f6f5f4;
+  --margin-bg:rgba(0,0,0,.03); --margin-line:#dedbd7;
+  --fb-hover:#00000010; --fb-sel:#3584e4; --fb-sel-text:#fff; --fb-icon:#5e5c64;
+  --c-kw:#a40000; --c-com:#3465a4; --c-str:#ad7fa8; --c-num:#ad7fa8;
+  --c-type:#4e9a06; --c-var:#c4a000;
+  --ui:Cantarell,"Adwaita Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Source Code Pro","Adwaita Mono","DejaVu Sans Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 :root[data-theme="dark"] {
-  --bg: #2e3436;
-  --panel: #353b3d;
-  --panel-2: #2a2f31;
-  --border: #4a5154;
-  --text: #eeeeec;
-  --muted: #a3a8a6;
-  --accent: #3584e4;
-  --accent-text: #ffffff;
-  --gutter: #3a4143;
-  --gutter-text: #8b918f;
-  --line-hl: #3a4143;
-  --hit: #c4a00040;
-  --c-kw: #ef2929;
-  --c-com: #729fcf;
-  --c-str: #ad7fa8;
-  --c-num: #ad7fa8;
-  --c-type: #8ae234;
-  --c-var: #fce94f;
-  --shadow: 0 1px 2px rgba(0,0,0,.4);
+  --bg:#2e3436; --panel:#353b3d; --panel-2:#2a2f31; --border:#4a5154;
+  --text:#eeeeec; --muted:#a3a8a6; --gutter:#353b3d; --gutter-text:#8b918f;
+  --line-hl:#3a4143; --hit:#c4a00040;
+  --hdr:#353b3d; --hbtn:#3f4647; --hbtn-border:#52595b; --tab-on:#2e3436;
+  --margin-bg:rgba(255,255,255,.03); --margin-line:#4a5154;
+  --fb-hover:#ffffff12; --fb-icon:#deddda;
+  --c-kw:#ef2929; --c-com:#729fcf; --c-type:#8ae234; --c-var:#fce94f;
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 76px; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Cantarell, sans-serif;
-  line-height: 1.5;
-}
-/* Top bar */
-header {
-  position: fixed; top: 0; left: 0; right: 0; height: 60px;
-  display: flex; align-items: center; gap: 12px;
-  padding: 0 16px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  z-index: 20;
-}
-header h1 { font-size: 16px; margin: 0; white-space: nowrap; font-weight: 600; }
-.search { flex: 1; max-width: 460px; position: relative; }
-.search input {
-  width: 100%; height: 36px; padding: 0 12px 0 34px;
-  border: 1px solid var(--border); border-radius: 6px;
-  background: var(--bg); color: var(--text); font-size: 14px;
-  outline: none;
-}
-.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #3584e455; }
-.search svg { position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; }
-.spacer { flex: 1; }
-button {
-  font: inherit; font-size: 13px; cursor: pointer;
-  height: 34px; padding: 0 12px;
-  border: 1px solid var(--border); border-radius: 6px;
-  background: var(--bg); color: var(--text);
-}
-button:hover { background: var(--panel-2); }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
-button.primary:hover { filter: brightness(1.1); }
-#menu { display: none; padding: 0 10px; }
-/* Sidebar */
-aside {
-  position: fixed; top: 60px; left: 0; bottom: 0; width: 270px;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
-  overflow-y: auto; padding: 12px 8px 24px;
-  z-index: 10;
-}
-aside h2 {
-  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--muted); margin: 14px 10px 6px;
-}
-aside a {
-  display: block; padding: 7px 10px; margin: 1px 0;
-  border-radius: 6px; color: var(--text); text-decoration: none; font-size: 14px;
-}
-aside a:hover { background: var(--panel-2); }
-aside a.active { background: var(--accent); color: var(--accent-text); }
-aside a.hidden { display: none; }
-/* ===== File browser sidebar (gedit style) ===== */
-:root { --fb-head: #ebebea; --fb-sel: #3584e4; --fb-sel-text: #fff; --fb-hover: #00000010; --fb-btn: #e1e1df; --fb-btn-border: #cdcdca; --fb-icon: #5e5c64; }
-:root[data-theme="dark"] { --fb-head: #323638; --fb-sel: #3584e4; --fb-sel-text: #fff; --fb-hover: #ffffff12; --fb-btn: #3d4345; --fb-btn-border: #50575a; --fb-icon: #deddda; }
-aside { padding: 0; display: flex; flex-direction: column; width: 270px; border-right: 1px solid var(--border); background: var(--bg); }
-.fb-title {
-  flex: none; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--fb-head); font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--border);
-}
-.chev { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.fb-nav {
-  flex: none; display: flex; gap: 6px; align-items: center; padding: 6px 8px;
-  background: var(--fb-head); border-bottom: 1px solid var(--border);
-}
-.fb-nav button {
-  height: 30px; min-width: 32px; padding: 0 8px; background: var(--fb-btn);
-  border: 1px solid var(--fb-btn-border); border-radius: 6px; color: var(--text);
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-}
-.fb-nav button:hover { filter: brightness(.96); background: var(--fb-btn); }
-.fb-nav svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.fb-nav .seg { display: inline-flex; }
-.fb-nav .seg button:first-child { border-radius: 6px 0 0 6px; }
-.fb-nav .seg button:last-child { border-radius: 0 6px 6px 0; border-left: none; }
-.fb-nav .root { flex: 1; justify-content: space-between; font-size: 14px; min-width: 0; }
-.fb-nav .root span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
-#tree { flex: 1; overflow: auto; padding: 4px 0 20px; font-size: 14px; user-select: none; }
-#tree .row, #tree a {
-  display: flex; align-items: center; gap: 6px; height: 28px;
-  padding: 0 10px 0 6px; margin: 0; border-radius: 0; color: var(--text);
-  text-decoration: none; white-space: nowrap; cursor: default;
-}
-#tree .row:hover, #tree a:hover { background: var(--fb-hover); }
-#tree a.active, #tree a.active:hover { background: var(--fb-sel); color: var(--fb-sel-text); }
-#tree a { padding-left: 38px; }
-#tree a span { overflow: hidden; text-overflow: ellipsis; }
-#tree a.hidden { display: none; }
-#tree .arrow { width: 14px; height: 14px; flex: none; fill: none; stroke: var(--fb-icon); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .12s; }
-#tree .folder.collapsed .arrow { transform: rotate(-90deg); }
-#tree .folder.collapsed .kids { display: none; }
-#tree .ico { width: 18px; height: 18px; flex: none; }
-#tree .row { cursor: pointer; }
-/* Main */
-main { margin-left: 270px; padding: 84px 28px 60px; max-width: 1100px; }
-.group-title { font-size: 22px; margin: 30px 0 10px; }
-.group-title:first-child { margin-top: 0; }
-.run {
-  background: var(--panel); border: 1px solid var(--border);
-  border-left: 4px solid var(--accent);
-  border-radius: 6px; padding: 10px 14px; margin: 0 0 22px; font-size: 14px;
-}
-.run b { display: block; margin-bottom: 4px; }
-.run code { font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; }
-.run div { font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 13px; }
-/* Code cards, editor-like */
-.card {
-  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-  margin: 0 0 28px; background: var(--bg); box-shadow: var(--shadow);
-}
-.card.hidden { display: none; }
-.card-head {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; background: var(--panel);
-  border-bottom: 1px solid var(--border);
-}
-.card-head h3 { font-size: 15px; margin: 0; flex: 1; font-weight: 600; }
-.badge {
-  font-size: 11px; padding: 2px 8px; border-radius: 10px;
-  background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
-}
-.code-wrap { overflow-x: auto; }
-.code {
-  margin: 0; padding: 6px 0;
-  font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace;
-  font-size: 13.5px; line-height: 1.55;
-  counter-reset: ln;
-  min-width: max-content;
-}
-.line { display: block; white-space: pre; padding-right: 16px; min-height: 1.55em; }
-.line::before {
-  counter-increment: ln; content: counter(ln);
-  display: inline-block; width: 4.2ch; text-align: right;
-  padding-right: 10px; margin-right: 12px;
-  color: var(--gutter-text); background: var(--gutter);
-  position: sticky; left: 0;
-  user-select: none;
-}
-.line:hover { background: var(--line-hl); }
-.line.hit { background: var(--hit); }
-.statusbar {
-  display: flex; justify-content: flex-end; gap: 18px;
-  padding: 4px 12px; font-size: 12px; color: var(--muted);
-  background: var(--panel); border-top: 1px solid var(--border);
-}
-.k { color: var(--c-kw); font-weight: 700; }
-.c { color: var(--c-com); }
-.s { color: var(--c-str); }
-.n { color: var(--c-num); }
-.t { color: var(--c-type); font-weight: 700; }
-.v { color: var(--c-var); }
-#empty { display: none; padding: 40px; text-align: center; color: var(--muted); }
-#toast {
-  position: fixed; bottom: 20px; right: 20px;
-  background: #2e3436; color: #fff; padding: 10px 16px; border-radius: 6px;
-  font-size: 14px; opacity: 0; transform: translateY(10px);
-  transition: all .2s; pointer-events: none; z-index: 50;
-}
-#toast.show { opacity: 1; transform: none; }
-@media (max-width: 800px) {
-  #menu { display: inline-block; }
-  header h1 { display: none; }
-  aside { transform: translateX(-100%); transition: transform .2s; box-shadow: 2px 0 8px rgba(0,0,0,.2); }
-  aside.open { transform: none; }
-  main { margin-left: 0; padding: 80px 12px 40px; }
-  button .lbl { display: none; }
-}
-/* ===== Single editor view (gedit style) ===== */
-html, body { height: 100%; overflow: hidden; }
-main { margin-left: 270px; max-width: none; padding: 60px 0 0; height: 100vh; display: flex; flex-direction: column; }
-.group-title, .run { display: none !important; }
-#empty { padding: 60px 20px; }
-.card {
-  display: none; flex: 1; min-height: 0; flex-direction: column;
-  margin: 0; border: 0; border-radius: 0; box-shadow: none; background: var(--bg);
-}
-.card.current { display: flex; }
-.card-head {
-  flex: none; height: 40px; padding: 0 6px 0 0; gap: 0;
-  background: var(--panel); border-bottom: 1px solid var(--border);
-}
-.card-head h3 {
-  flex: 1; height: 40px; line-height: 37px; margin: 0;
-  text-align: center; font-size: 14px; font-weight: 400;
-  border-bottom: 3px solid var(--accent); background: var(--panel-2);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.card-head .badge { display: none; }
-.card-head button { height: 28px; margin-left: 8px; font-size: 13px; padding: 0 12px; }
-.code-wrap { flex: 1; min-height: 0; overflow: auto; position: relative; }
-.code { padding: 0; font-size: 15px; line-height: 23px; min-height: 100%; }
-.line { min-height: 23px; padding-right: 24px; cursor: text; }
-.line:hover { background: transparent; }
-.line.hit { background: var(--hit); }
-.line.cur, .line.cur.hit { background: var(--line-hl); }
-.line::before { width: 4ch; padding-right: 6px; margin-right: 5px; background: var(--gutter); }
-.statusbar {
-  flex: none; height: 28px; padding: 0; gap: 0; align-items: center; justify-content: flex-start;
-  font-size: 13px; color: var(--text); background: var(--bg); border-top: 1px solid var(--border);
-}
-.statusbar span { padding: 0 12px; white-space: nowrap; }
-.statusbar .run-info {
-  margin-right: auto; color: var(--muted); overflow: hidden; text-overflow: ellipsis; min-width: 0;
-  font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 12.5px;
-}
-@media (max-width: 800px) { main { margin-left: 0; padding: 60px 0 0; } .statusbar .tw { display: none; } }
-/* ===== Header like gedit headerbar ===== */
-:root { --hdr: #e8e8e6; --hbtn: #f6f5f4; --hbtn-border: #cdcdca; }
-:root[data-theme="dark"] { --hdr: #353b3d; --hbtn: #3f4647; --hbtn-border: #52595b; }
-header {
-  height: 50px; padding: 0; gap: 0; align-items: stretch;
-  background: var(--hdr); border-bottom: 1px solid var(--border);
-}
-.hb-left {
-  width: 270px; flex: none; display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-weight: 700; font-size: 14px; border-right: 1px solid var(--border);
-}
-.hb-right { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 10px; }
-.hb-group { display: flex; align-items: center; gap: 8px; flex: none; }
-.hb-right button {
-  height: 34px; padding: 0 16px; font-size: 14px; background: var(--hbtn);
-  border: 1px solid var(--hbtn-border); border-radius: 6px; color: var(--text);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.hb-right button:hover { filter: brightness(.97); background: var(--hbtn); }
-.hb-right .sq { width: 36px; padding: 0; }
-.hb-right .x { border: 0; background: transparent; width: 32px; padding: 0; }
-.hb-right .x:hover { background: var(--fb-hover); }
-.hb-right svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.split { display: inline-flex; }
-.split button:first-child { border-radius: 6px 0 0 6px; }
-.split .arrow { border-radius: 0 6px 6px 0; border-left: 0; padding: 0 9px; }
-.hb-title { flex: 1; min-width: 0; text-align: center; line-height: 1.25; }
-.hb-title b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hb-title small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.menu-wrap { position: relative; }
-.pop {
-  position: absolute; right: 0; top: 42px; min-width: 200px; padding: 6px;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.18); z-index: 40;
-}
-.pop[hidden] { display: none; }
-.hb-right .pop button {
-  width: 100%; height: 32px; justify-content: space-between; padding: 0 10px;
-  background: transparent; border: 0; border-radius: 6px; font-size: 14px;
-}
-.hb-right .pop button:hover { background: var(--fb-hover); filter: none; }
-.pop .tick { visibility: hidden; color: var(--accent); }
-.pop button.on .tick { visibility: visible; }
-.pop .sep { height: 1px; background: var(--border); margin: 5px 4px; }
-/* sidebar header row + search */
-aside { top: 50px; }
-.fb-nav { height: 44px; padding: 0 8px; background: var(--hdr); }
-.fb-search { flex: 1; min-width: 0; position: relative; }
-.fb-search svg { position: absolute; left: 8px; top: 8px; width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; }
-.fb-search input {
-  width: 100%; height: 30px; padding: 0 8px 0 27px; font-size: 14px;
-  background: var(--bg); color: var(--text); border: 1px solid var(--fb-btn-border);
-  border-radius: 6px; outline: none;
-}
-.fb-search input:focus { border-color: var(--accent); }
-/* tab bar: no blue */
-main { padding-top: 50px; }
-.card-head { height: 44px; background: var(--hdr); border-bottom: 1px solid var(--border); padding: 0; }
-.card-head h3 { height: 44px; line-height: 44px; border-bottom: 0; background: var(--hdr); }
-body.sb-hidden aside { display: none; }
-body.sb-hidden main { margin-left: 0; }
-@media (max-width: 800px) {
-  .hb-left, .hb-title small, #openBtn, #openArrow { display: none; }
-  .hb-title b { text-align: center; }
-  main { padding-top: 50px; }
-}
+* { box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:var(--ui); font-size:15px; line-height:1.4; }
+button { font:inherit; font-size:15px; cursor:pointer; color:var(--text); }
+
+/* ===== Headerbar ===== */
+header { position:fixed; top:0; left:0; right:0; height:46px; display:flex; align-items:stretch; background:var(--hdr); border-bottom:1px solid var(--border); z-index:20; }
+.chev { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.hb-left { width:240px; flex:none; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:15px; border-right:1px solid var(--border); }
+.hb-right { flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 7px 0 12px; }
+.hb-group { display:flex; align-items:center; gap:6px; flex:none; }
+.hb-right button { height:32px; padding:0 16px; background:var(--hbtn); border:1px solid var(--hbtn-border); border-radius:6px; box-shadow:0 1px 0 rgba(0,0,0,.05); display:inline-flex; align-items:center; justify-content:center; }
+.hb-right button:hover { filter:brightness(.97); }
+.hb-right .sq { width:36px; padding:0; }
+.hb-right .x { border:0; background:transparent; box-shadow:none; width:32px; padding:0; }
+.hb-right .x:hover { background:var(--fb-hover); filter:none; }
+.hb-right svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.split { display:inline-flex; }
+.split button:first-child { border-radius:6px 0 0 6px; width:66px; padding:0; }
+.split .arrow { border-radius:0 6px 6px 0; border-left:0; width:36px; padding:0; }
+.hb-title { flex:1; min-width:0; text-align:center; line-height:1.25; }
+.hb-title b { display:block; font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hb-title small { display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.menu-wrap { position:relative; }
+.pop { position:absolute; right:0; top:40px; min-width:200px; padding:6px; background:var(--bg); border:1px solid var(--border); border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.18); z-index:40; }
+.pop[hidden] { display:none; }
+.hb-right .pop button { width:100%; height:32px; justify-content:space-between; padding:0 10px; background:transparent; border:0; box-shadow:none; border-radius:6px; }
+.hb-right .pop button:hover { background:var(--fb-hover); filter:none; }
+.pop .tick { visibility:hidden; color:var(--accent); }
+.pop button.on .tick { visibility:visible; }
+.pop .sep { height:1px; background:var(--border); margin:5px 4px; }
+
+/* ===== Sidebar ===== */
+aside { position:fixed; top:46px; left:0; bottom:0; width:240px; display:flex; flex-direction:column; background:var(--bg); border-right:1px solid var(--border); z-index:10; }
+.fb-nav { flex:none; height:38px; display:flex; gap:6px; align-items:center; padding:0 3px; background:var(--hdr); border-bottom:1px solid var(--border); }
+.fb-nav button { height:32px; min-width:34px; padding:0 8px; background:var(--hbtn); border:1px solid var(--hbtn-border); border-radius:6px; box-shadow:0 1px 0 rgba(0,0,0,.05); display:inline-flex; align-items:center; justify-content:center; }
+.fb-nav button:hover { filter:brightness(.97); }
+.fb-nav svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.fb-nav .seg { display:inline-flex; }
+.fb-nav .seg button:first-child { border-radius:6px 0 0 6px; }
+.fb-nav .seg button:last-child { border-radius:0 6px 6px 0; border-left:0; }
+.fb-search { flex:1; min-width:0; position:relative; }
+.fb-search svg { position:absolute; left:9px; top:9px; width:14px; height:14px; fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linecap:round; }
+.fb-search input { width:100%; height:32px; padding:0 8px 0 29px; font:inherit; font-size:15px; background:var(--hbtn); color:var(--text); border:1px solid var(--hbtn-border); border-radius:6px; outline:none; }
+.fb-search input:focus { background:var(--bg); border-color:var(--accent); }
+#tree { flex:1; overflow:auto; padding:2px 0 20px; font-size:15px; user-select:none; }
+#tree .row, #tree a { display:flex; align-items:center; height:25px; padding:0 10px 0 2px; gap:2px; color:var(--text); text-decoration:none; white-space:nowrap; cursor:default; }
+#tree .row { cursor:pointer; }
+#tree .row:hover, #tree a:hover { background:var(--fb-hover); }
+#tree a { padding-left:36px; gap:0; }
+#tree a span { overflow:hidden; text-overflow:ellipsis; }
+#tree a.active, #tree a.active:hover { background:var(--fb-sel); color:var(--fb-sel-text); }
+#tree a.hidden { display:none; }
+#tree .arrow { width:14px; height:14px; flex:none; fill:none; stroke:var(--fb-icon); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; transition:transform .12s; }
+#tree .folder.collapsed .arrow { transform:rotate(-90deg); }
+#tree .folder.collapsed .kids { display:none; }
+#tree .ico { width:18px; height:18px; flex:none; }
+body.sb-hidden aside { display:none; }
+body.sb-hidden main { margin-left:0; }
+
+/* ===== Editor area ===== */
+main { margin-left:240px; padding-top:46px; height:100vh; display:flex; flex-direction:column; }
+.group-title, .run { display:none !important; }
+#empty { display:none; padding:60px 20px; text-align:center; color:var(--muted); }
+.card { display:none; flex:1; min-height:0; flex-direction:column; background:var(--bg); }
+.card.current { display:flex; }
+
+/* tab bar */
+.card-head { position:relative; flex:none; height:38px; display:flex; align-items:stretch; background:var(--hdr); border-bottom:1px solid var(--border); overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+.card-head::-webkit-scrollbar { display:none; }
+.card-head .badge { display:none; }
+.tab { position:relative; flex:1 0 170px; display:flex; align-items:center; justify-content:center; padding:0 32px; border-right:1px solid var(--border); border-bottom:3px solid transparent; cursor:default; }
+.tab:hover { background:var(--fb-hover); }
+.tab span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tab svg { position:absolute; right:12px; top:50%; margin-top:-6px; width:12px; height:12px; fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linecap:round; pointer-events:none; }
+.tab.on { background:var(--tab-on); border-bottom-color:var(--accent); }
+.tab.hidden { display:none; }
+
+/* code */
+.code-wrap { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; position:relative; }
+.code-wrap::-webkit-scrollbar { width:10px; height:10px; }
+.code-wrap::-webkit-scrollbar-thumb { background:#9a999655; border-radius:5px; border:2px solid transparent; background-clip:content-box; }
+.code { --d:2; --g:calc(var(--d) * 1ch + 11px); position:relative; margin:0; padding:0; min-height:100%; font-family:var(--mono); font-size:15px; line-height:20px; counter-reset:ln; }
+.code::after { content:""; position:absolute; top:0; bottom:0; right:0; left:calc(var(--g) + 80ch); background:var(--margin-bg); border-left:1px solid var(--margin-line); pointer-events:none; }
+.line { display:block; position:relative; min-height:20px; padding:0 0 0 var(--g); padding-right:max(0px, calc(100% - var(--g) - 80ch)); white-space:pre-wrap; overflow-wrap:anywhere; cursor:text; }
+.line::before { counter-increment:ln; content:counter(ln); position:absolute; left:0; top:0; bottom:0; width:calc(var(--d) * 1ch + 9px); padding-right:3px; text-align:right; color:var(--gutter-text); background:var(--gutter); user-select:none; }
+.line.hit { background:var(--hit); }
+.line.cur, .line.cur.hit { background:var(--line-hl); }
+.line.cur::before { background:var(--line-hl); }
+.k { color:var(--c-kw); font-weight:700; }
+.c { color:var(--c-com); }
+.s { color:var(--c-str); }
+.n { color:var(--c-num); }
+.t { color:var(--c-type); font-weight:700; }
+.v { color:var(--c-var); }
+
+/* status bar */
+.statusbar { flex:none; height:28px; display:flex; align-items:center; justify-content:flex-start; font-size:13px; color:var(--text); background:var(--panel); border-top:1px solid var(--border); }
+.statusbar span { padding:0 10px; white-space:nowrap; }
+.statusbar .run-info { margin-right:auto; color:var(--muted); overflow:hidden; text-overflow:ellipsis; min-width:0; font-family:var(--mono); font-size:12.5px; }
+.statusbar .chev { width:12px; height:12px; vertical-align:-2px; margin-left:2px; }
+
 /* ===== Find box ===== */
-mark.m { background: #fce94f99; color: inherit; padding: 0; border-radius: 2px; }
-mark.m.cur { background: #f57900; color: #fff; outline: 2px solid #f5790066; }
-#findBox {
-  position: fixed; top: 106px; right: 24px; width: 352px; max-width: calc(100vw - 24px);
-  padding: 10px; background: var(--panel); border: 1px solid var(--border);
-  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.22); z-index: 30;
+mark.m { background:#fce94f99; color:inherit; padding:0; border-radius:2px; }
+mark.m.cur { background:#f57900; color:#fff; outline:2px solid #f5790066; }
+#findBox { position:fixed; top:94px; right:20px; width:352px; max-width:calc(100vw - 24px); padding:10px; background:var(--panel); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.22); z-index:30; }
+#findBox[hidden] { display:none; }
+.fx-row { display:flex; align-items:center; gap:8px; }
+.fx-in { flex:1; min-width:0; position:relative; }
+.fx-in svg { position:absolute; left:9px; top:9px; width:14px; height:14px; fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linecap:round; }
+.fx-in input { width:100%; height:32px; padding:0 8px 0 29px; font:inherit; font-size:14px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:5px; outline:none; }
+.fx-in input:focus { border-color:var(--accent); }
+.fx-seg { display:inline-flex; flex:none; }
+#findBox button { height:32px; width:34px; padding:0; background:var(--hbtn); color:var(--text); border:1px solid var(--hbtn-border); display:inline-flex; align-items:center; justify-content:center; }
+#findBox button:hover { filter:brightness(.96); }
+#findBox button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#findPrev { border-radius:6px 0 0 6px; }
+#findNext { border-radius:0 6px 6px 0; border-left:0; }
+#findBox .fx-x { border:0; background:transparent; width:28px; border-radius:6px; flex:none; }
+#findBox .fx-x:hover { background:var(--fb-hover); }
+.fx-count { margin-top:8px; padding-left:2px; font-size:13px; color:var(--muted); }
+
+#toast { position:fixed; bottom:40px; right:20px; background:#2e3436; color:#fff; padding:10px 16px; border-radius:6px; font-size:14px; opacity:0; transform:translateY(10px); transition:all .2s; pointer-events:none; z-index:50; }
+#toast.show { opacity:1; transform:none; }
+
+@media (max-width:800px) {
+  .hb-left, .hb-title small, #openBtn, #openArrow { display:none; }
+  aside { transform:translateX(-100%); transition:transform .2s; box-shadow:2px 0 8px rgba(0,0,0,.2); }
+  aside.open { transform:none; }
+  main { margin-left:0; }
+  .statusbar .tw { display:none; }
+  .tab { flex-basis:140px; }
 }
-#findBox[hidden] { display: none; }
-.fx-row { display: flex; align-items: center; gap: 8px; }
-.fx-in { flex: 1; min-width: 0; position: relative; }
-.fx-in svg { position: absolute; left: 9px; top: 9px; width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; }
-.fx-in input {
-  width: 100%; height: 32px; padding: 0 8px 0 29px; font-size: 14px;
-  background: var(--bg); color: var(--text); border: 1px solid var(--border);
-  border-radius: 5px; outline: none;
-}
-.fx-in input:focus { border-color: var(--accent); }
-.fx-seg { display: inline-flex; flex: none; }
-#findBox button {
-  height: 32px; width: 34px; padding: 0; background: var(--hbtn); color: var(--text);
-  border: 1px solid var(--hbtn-border); display: inline-flex; align-items: center; justify-content: center;
-}
-#findBox button:hover { filter: brightness(.96); background: var(--hbtn); }
-#findBox button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-#findPrev { border-radius: 6px 0 0 6px; }
-#findNext { border-radius: 0 6px 6px 0; border-left: 0; }
-#findBox .fx-x { border: 0; background: transparent; width: 28px; border-radius: 6px; flex: none; }
-#findBox .fx-x:hover { background: var(--fb-hover); }
-.fx-count { margin-top: 8px; padding-left: 2px; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -570,6 +374,11 @@ if [ -e "$filename" ]; then
     fi
 fi
 
+if [ -d "$filename" ]; then
+    echo "That is a directory, not a file."
+    exit 1
+fi
+
 touch -- "$filename" || exit 1
 
 echo "File created successfully."
@@ -577,7 +386,7 @@ echo "File created successfully."
 echo "Enter file contents:"
 echo "Press Ctrl+D on a new line to finish."
 
-cat > "$filename"
+cat > "$filename" || { echo "Write failed."; exit 1; }
 
 echo "===== FILE CONTENTS ====="
 cat -- "$filename"
@@ -652,8 +461,11 @@ echo "===== DELETE FILE ====="
 read -r -p "Delete file? (y/n): " choice
 
 if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
-    rm -- "$filename"
-    echo "File deleted."
+    if rm -- "$filename"; then
+        echo "File deleted."
+    else
+        echo "File deletion failed."
+    fi
 else
     echo "File not deleted."
 fi
@@ -677,6 +489,10 @@ if ! [[ "$a" =~ ^-?[0-9]+$ &&
     echo "Invalid integers."
     exit 1
 fi
+
+# force decimal so inputs like 08 are not read as octal
+a=$(( ${a%%[0-9]*}10#${a#-} ))
+b=$(( ${b%%[0-9]*}10#${b#-} ))
 
 echo "Addition = $((a+b))"
 echo "Subtraction = $((a-b))"
@@ -767,6 +583,8 @@ if ! [[ "$n" =~ ^-?[0-9]+$ ]]; then
     exit 1
 fi
 
+n=$(( ${n%%[0-9]*}10#${n#-} ))
+
 if (( n % 2 == 0 )); then
     echo "$n is Even"
 else
@@ -784,6 +602,10 @@ for value in "$x" "$y" "$z"; do
     fi
 done
 
+x=$(( ${x%%[0-9]*}10#${x#-} ))
+y=$(( ${y%%[0-9]*}10#${y#-} ))
+z=$(( ${z%%[0-9]*}10#${z#-} ))
+
 if (( x >= y && x >= z )); then
     echo "Largest = $x"
 elif (( y >= z )); then
@@ -800,6 +622,8 @@ if ! [[ "$yr" =~ ^[0-9]+$ ]] || (( yr < 1 )); then
     echo "Invalid year."
     exit 1
 fi
+
+yr=$((10#$yr))
 
 if (( yr % 400 == 0 ||
       (yr % 4 == 0 && yr % 100 != 0) )); then
@@ -949,6 +773,7 @@ if ! [[ "$f" =~ ^[0-9]+$ ]] || (( f > 20 )); then
     exit 1
 fi
 
+f=$((10#$f))
 fact=1
 
 for ((i=2; i<=f; i++)); do
@@ -1073,6 +898,7 @@ if ! [[ "$num" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+num=$((10#$num))
 t=$num
 big=0
 small=9
@@ -1107,6 +933,7 @@ if ! [[ "$p" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+p=$((10#$p))
 prime=1
 
 if (( p < 2 )); then
@@ -1301,7 +1128,11 @@ while true; do
     echo "5. GMT time"
     echo "6. Exit"
 
-    read -r -p "Enter choice: " choice
+    if ! read -r -p "Enter choice: " choice; then
+        echo
+        echo "Input closed."
+        break
+    fi
 
     case "$choice" in
         1)
@@ -1463,7 +1294,10 @@ int main(void) {
     // Collect page reference values
     printf("Enter %d page reference values: ", n);
     for (int i = 0; i < n; i++) {
-        scanf("%d", &pages[i]);
+        if (scanf("%d", &pages[i]) != 1 || pages[i] < 0) {
+            printf("Page numbers must be nonnegative integers.\n");
+            return 1;
+        }
     }
 
     // Run simulation
@@ -1477,7 +1311,9 @@ int main(void) {
 #include <string.h>
 
 #define MAX_PROC 20          // Max processes array can hold
-#define TIMELINE_LEN 500     // Max timeline length for tick-by-tick tracking
+#define TIMELINE_LEN 600     // Max timeline length for tick-by-tick tracking
+#define MAX_AT 100           // Max arrival time accepted
+#define MAX_BT 20            // Max burst time accepted
 
 void solve(int n, int at[], int bt[], int pr[]) {
 
@@ -1510,6 +1346,11 @@ void solve(int n, int at[], int bt[], int pr[]) {
     // TICK-BY-TICK SIMULATION LOOP
     // Runs every single clock tick until all processes are completed
     while (done < n) {
+        // never write past the timeline array
+        if (time >= TIMELINE_LEN) {
+            printf("Timeline too long (max %d ticks).\n", TIMELINE_LEN);
+            return;
+        }
         int cur = -1; // Index of current highest priority process (-1 means none ready)
 
         // Find arrived process with highest priority (lower number = higher priority)
@@ -1630,7 +1471,11 @@ int main(void) {
     // Collect AT, BT, and Priority for each process
     for (int i = 0; i < n; i++) {
         printf("Enter AT, BT, and Priority (1 is highest) for P%d: ", i + 1);
-        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);
+        if (scanf("%d %d %d", &at[i], &bt[i], &pr[i]) != 3 ||
+            at[i] < 0 || at[i] > MAX_AT || bt[i] <= 0 || bt[i] > MAX_BT || pr[i] < 1) {
+            printf("Invalid process input.\n");
+            return 1;
+        }
     }
 
     // Solve and run simulation
@@ -1644,105 +1489,90 @@ int main(void) {
 
 #define MAX 20 // max process array can hold
 
-void solve(int n, int at[], int bt[], int pr[]) {
+// NON-PREEMPTIVE SJF: among arrived processes, pick the smallest burst time
+// and run it to completion.
+void solve(int n, int at[], int bt[]) {
 
     // VARIABLE DECLARE
 
-    // declare all variables that are in table 
-    // CT RT TAT WT Preemptions
+    // declare all variables that are in table
+    // CT RT TAT WT
     int ct[MAX];
     int rt[MAX];
     int tat[MAX];
     int wt[MAX];
-    int pre[MAX]; // preemption count tracker
 
     // declare all variables to put in gantt chart
-    // gantt_pid , gantt_start , gantt_end , gc (ganttchart entry counter)
+    // one block per run or idle gap, so at most 2 * n blocks
     int gantt_pid[MAX * 2];
     int gantt_start[MAX * 2];
     int gantt_end[MAX * 2];
-    int gc = 0; // counts how many blocks recorded in gantt chart 
+    int gc = 0; // counts how many blocks recorded in gantt chart
 
     // declare all variables that track progress
     int time = 0;
     int completed = 0;
     int cswitch = 0;
-    int done[MAX] = {0}; // done is array cause we need n done flags for n number of processes  
-
-    // extra tracking variables for preemptive execution
-    int rem[MAX];        // remaining burst time
-    for (int i = 0; i < n; i++) rem[i] = bt[i];
-    for (int i = 0; i < n; i++) rt[i] = -1; // -1 to track first start time for RT
-    int last_pid = -1;   // tracks process running in previous tick
+    int last_pid = -1;   // process that ran in the previous block
+    int done[MAX] = {0}; // done flag for each process
 
     // ------------------------------------------
 
-    // TICK-BY-TICK SIMULATION LOOP (Preemptive Priority)
+    // SCHEDULING LOOP
     while (completed < n) {
-        int idx = -1;            // index of chosen process (-1 is not assigned yet)
-        int min_pr = 99999;      // keep high so lower priority numbers (higher priority) replace it
+        int idx = -1; // index of chosen process (-1 is not assigned yet)
 
-        // find which process has arrived + which has highest priority (lowest priority number)
+        // find arrived process with the smallest burst time
+        // tie-breaker: earlier arrival
         for (int i = 0; i < n; i++) {
             if (!done[i] && at[i] <= time) {
-                // check if priority is higher (smaller number)
-                if (pr[i] < min_pr || (pr[i] == min_pr && at[i] < at[idx])) {
-                    min_pr = pr[i];
-                    idx = i;     // process at ith index is now selected
+                if (idx == -1 || bt[i] < bt[idx] || (bt[i] == bt[idx] && at[i] < at[idx])) {
+                    idx = i;
                 }
             }
         }
 
-        // IF NO PROCESS ARRIVED, CPU IDLE FOR 1 TIME UNIT
+        // IF NO PROCESS HAS ARRIVED, CPU IS IDLE UNTIL THE NEXT ARRIVAL
         if (idx == -1) {
-            gantt_pid[gc] = -1;  // put idle process (-1) in this gantt block
+            int next = -1;
+            for (int i = 0; i < n; i++) {
+                if (!done[i] && (next == -1 || at[i] < at[next])) next = i;
+            }
+            gantt_pid[gc] = -1;
             gantt_start[gc] = time;
-            gantt_end[gc] = time + 1;
-            time++;
+            gantt_end[gc] = at[next];
             gc++;
+            time = at[next];
             last_pid = -1;
             continue;
         }
 
-        // -------------------------------------------------------
-
-        // count context switch and preemption
+        // count context switch when a different process takes the CPU
         if (last_pid != -1 && last_pid != idx) {
-            cswitch++;          // switched from a different process
-            if (rem[last_pid] > 0) {
-                pre[last_pid]++; // previous process was interrupted before finishing
-            }
+            cswitch++;
         }
 
-        // record response time on first execution touch
-        if (rt[idx] == -1) {
-            rt[idx] = time - at[idx];
-        }
+        // response time = first start - arrival
+        rt[idx] = time - at[idx];
 
-        // execute process for 1 time unit (tick)
+        // run the process to completion
         gantt_pid[gc] = idx;
         gantt_start[gc] = time;
+        time += bt[idx];
+        gantt_end[gc] = time;
+        gc++;
 
-        time++;                 // advance system clock by 1 tick
-        rem[idx]--;             // decrease remaining burst time by 1
-
-        gantt_end[gc] = time;   // end time of this 1-tick block
-        gc++;                   // move to next gantt slot
-        last_pid = idx;         // update last running process
-
-        // check if process finished execution
-        if (rem[idx] == 0) {
-            ct[idx] = time;
-            tat[idx] = ct[idx] - at[idx];
-            wt[idx] = tat[idx] - bt[idx];
-            done[idx] = 1;
-            completed++;
-        }
+        ct[idx] = time;
+        tat[idx] = ct[idx] - at[idx];
+        wt[idx] = tat[idx] - bt[idx];
+        done[idx] = 1;
+        completed++;
+        last_pid = idx;
     }
 
     // -------------------------------------------
 
-    // PRINT EVERYTHING 
+    // PRINT EVERYTHING
 
     // 1. Print Top Border
     printf("\nGantt Chart:\n+");
@@ -1751,50 +1581,45 @@ void solve(int n, int at[], int bt[], int pr[]) {
     // 2. Print Process Names / IDLE inside boxes
     printf("\n|");
     for (int i = 0; i < gc; i++) {
-        if (gantt_pid[i] == -1) {
-            printf(" IDLE |");
-        }
-        else {
-            printf("  P%-d |", gantt_pid[i] + 1);
-        } 
+        if (gantt_pid[i] == -1) printf(" IDLE |");
+        else printf("  P%-2d |", gantt_pid[i] + 1);
     }
 
     // 3. Print Bottom Border
     printf("\n+");
     for (int i = 0; i < gc; i++) printf("------+");
 
-    // 4. Print Timeline Numbers underneath
-    printf("\n%-d", gantt_start[0]);
+    // 4. Print Timeline Numbers underneath (7 chars per block)
+    printf("\n%-7d", gantt_start[0]);
     for (int i = 0; i < gc; i++) {
-        printf("   %-d", gantt_end[i]);
+        printf("%-7d", gantt_end[i]);
     }
     printf("\n");
 
     // Print process metrics table cleanly using tabs
-    printf("\nProcess\tAT\tBT\tPriority\tCT\tRT\tTAT\tWT\tPreempt\n");
-    printf("-------------------------------------------------------------------\n");
+    printf("\nProcess\tAT\tBT\tCT\tRT\tTAT\tWT\n");
+    printf("-------------------------------------------------------\n");
 
     float sum_wt = 0.0f, sum_tat = 0.0f;
     for (int i = 0; i < n; i++) {
-        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
-               i + 1, at[i], bt[i], pr[i], ct[i], rt[i], tat[i], wt[i], pre[i]);
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], ct[i], rt[i], tat[i], wt[i]);
         sum_wt += wt[i];
         sum_tat += tat[i];
     }
 
     // Print Summary Averages & Context Switches
     printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
-    printf("Average Turnaround Time    = %.2f\n", sum_tat / n); 
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n);
     printf("Number of Context Switches = %d\n", cswitch);
 }
 
 int main(void) {
-    // take num of process, AT, BT, and Priority for those process and pass them to solve function
+    // take num of process, AT and BT for those process and pass them to solve function
 
     int n;             // no of process by user
     int at[MAX];       // array to store AT
     int bt[MAX];       // array to store BT
-    int pr[MAX];       // array to store Priority
 
     // ask number of process
     printf("Enter number of processes: ");
@@ -1803,14 +1628,17 @@ int main(void) {
         return 1;
     }
 
-    // collect AT, BT, and Priority
+    // collect AT and BT
     for (int i = 0; i < n; i++) {
-        printf("Enter AT, BT, and Priority (1 is highest) for P%d: ", i + 1);
-        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);    
+        printf("Enter AT and BT for P%d: ", i + 1);
+        if (scanf("%d %d", &at[i], &bt[i]) != 2 || at[i] < 0 || bt[i] <= 0) {
+            printf("Invalid process input.\n");
+            return 1;
+        }
     }
 
     // solve
-    solve(n, at, bt, pr);
+    solve(n, at, bt);
     return 0;
 }
 </script>
@@ -1935,10 +1763,16 @@ int main(void)
 
     // Ask number of processes and resources
     printf("Enter number of processes: ");
-    scanf("%d", &processes); // Fixed: added &
+    if (scanf("%d", &processes) != 1 || processes < 1 || processes > MAX_PROCESS) {
+        printf("Invalid process count.\n");
+        return 1;
+    }
 
     printf("Enter number of resource types: ");
-    scanf("%d", &resources); // Fixed: added &
+    if (scanf("%d", &resources) != 1 || resources < 1 || resources > MAX_RESOURCE) {
+        printf("Invalid resource count.\n");
+        return 1;
+    }
 
     // Collect allocation matrix
     printf("Enter Allocation Matrix (%d x %d):\n", processes, resources);
@@ -1946,7 +1780,10 @@ int main(void)
     {
         for (int j = 0; j < resources; j++)
         {
-            scanf("%d", &allocation[i][j]);
+            if (scanf("%d", &allocation[i][j]) != 1 || allocation[i][j] < 0) {
+                printf("Invalid allocation value.\n");
+                return 1;
+            }
         }
     }
 
@@ -1956,7 +1793,10 @@ int main(void)
     {
         for (int j = 0; j < resources; j++)
         {
-            scanf("%d", &max_need[i][j]);
+            if (scanf("%d", &max_need[i][j]) != 1 || max_need[i][j] < allocation[i][j]) {
+                printf("Invalid max value (must be >= allocation).\n");
+                return 1;
+            }
         }
     }
 
@@ -1964,7 +1804,10 @@ int main(void)
     printf("Enter Available Resources (%d values): ", resources);
     for (int j = 0; j < resources; j++)
     {
-        scanf("%d", &available[j]);
+        if (scanf("%d", &available[j]) != 1 || available[j] < 0) {
+            printf("Invalid available value.\n");
+            return 1;
+        }
     }
 
     // Pass all required matrices and vectors to bankers function
@@ -2109,7 +1952,9 @@ int main(void) {
 #include <string.h>
 
 #define MAX_PROC 20          // Max processes array can hold
-#define TIMELINE_LEN 500     // Max timeline length for tick-by-tick tracking
+#define TIMELINE_LEN 600     // Max timeline length for tick-by-tick tracking
+#define MAX_AT 100           // Max arrival time accepted
+#define MAX_BT 20            // Max burst time accepted
 
 void solve(int n, int at[], int bt[], int pr[]) {
 
@@ -2142,6 +1987,11 @@ void solve(int n, int at[], int bt[], int pr[]) {
     // TICK-BY-TICK SIMULATION LOOP
     // Runs every single clock tick until all processes are completed
     while (done < n) {
+        // never write past the timeline array
+        if (time >= TIMELINE_LEN) {
+            printf("Timeline too long (max %d ticks).\n", TIMELINE_LEN);
+            return;
+        }
         int cur = -1; // Index of current highest priority process (-1 means none ready)
 
         // Find arrived process with highest priority (lower number = higher priority)
@@ -2263,106 +2113,90 @@ int main(void) {
 
 #define MAX 20 // max process array can hold
 
-void solve(int n, int at[], int bt[], int pr[]) {
+// NON-PREEMPTIVE SJF: among arrived processes, pick the smallest burst time
+// and run it to completion.
+void solve(int n, int at[], int bt[]) {
 
     // VARIABLE DECLARE
 
-    // declare all variables that are in table 
-    // CT RT TAT WT Preemptions
+    // declare all variables that are in table
+    // CT RT TAT WT
     int ct[MAX];
     int rt[MAX];
     int tat[MAX];
     int wt[MAX];
-    int pre[MAX]; // preemption count tracker
 
     // declare all variables to put in gantt chart
-    // gantt_pid , gantt_start , gantt_end , gc (ganttchart entry counter)
+    // one block per run or idle gap, so at most 2 * n blocks
     int gantt_pid[MAX * 2];
     int gantt_start[MAX * 2];
     int gantt_end[MAX * 2];
-    int gc = 0; // counts how many blocks recorded in gantt chart 
+    int gc = 0; // counts how many blocks recorded in gantt chart
 
     // declare all variables that track progress
     int time = 0;
     int completed = 0;
     int cswitch = 0;
-    int done[MAX] = {0}; // done is array cause we need n done flags for n number of processes  
-
-    // extra tracking variables for preemptive execution
-    int rem[MAX];        // remaining burst time
-    for (int i = 0; i < n; i++) rem[i] = bt[i];
-    for (int i = 0; i < n; i++) rt[i] = -1; // -1 to track first start time for RT
-    for (int i = 0; i < n; i++) pre[i] = 0;  // init preemption counters
-    int last_pid = -1;   // tracks process running in previous tick
+    int last_pid = -1;   // process that ran in the previous block
+    int done[MAX] = {0}; // done flag for each process
 
     // ------------------------------------------
 
-    // TICK-BY-TICK SIMULATION LOOP (Preemptive Priority)
+    // SCHEDULING LOOP
     while (completed < n) {
-        int idx = -1;            // index of chosen process (-1 is not assigned yet)
-        int min_pr = 99999;      // keep high so lower priority numbers (higher priority) replace it
+        int idx = -1; // index of chosen process (-1 is not assigned yet)
 
-        // find which process has arrived + which has highest priority (lowest priority number)
+        // find arrived process with the smallest burst time
+        // tie-breaker: earlier arrival
         for (int i = 0; i < n; i++) {
             if (!done[i] && at[i] <= time) {
-                // check if priority is higher (smaller number)
-                if (pr[i] < min_pr || (pr[i] == min_pr && at[i] < at[idx])) {
-                    min_pr = pr[i];
-                    idx = i;     // process at ith index is now selected
+                if (idx == -1 || bt[i] < bt[idx] || (bt[i] == bt[idx] && at[i] < at[idx])) {
+                    idx = i;
                 }
             }
         }
 
-        // IF NO PROCESS ARRIVED, CPU IDLE FOR 1 TIME UNIT
+        // IF NO PROCESS HAS ARRIVED, CPU IS IDLE UNTIL THE NEXT ARRIVAL
         if (idx == -1) {
-            gantt_pid[gc] = -1;  // put idle process (-1) in this gantt block
+            int next = -1;
+            for (int i = 0; i < n; i++) {
+                if (!done[i] && (next == -1 || at[i] < at[next])) next = i;
+            }
+            gantt_pid[gc] = -1;
             gantt_start[gc] = time;
-            gantt_end[gc] = time + 1;
-            time++;
+            gantt_end[gc] = at[next];
             gc++;
+            time = at[next];
             last_pid = -1;
             continue;
         }
 
-        // -------------------------------------------------------
-
-        // count context switch and preemption
+        // count context switch when a different process takes the CPU
         if (last_pid != -1 && last_pid != idx) {
-            cswitch++;          // switched from a different process
-            if (rem[last_pid] > 0) {
-                pre[last_pid]++; // previous process was interrupted before finishing
-            }
+            cswitch++;
         }
 
-        // record response time on first execution touch
-        if (rt[idx] == -1) {
-            rt[idx] = time - at[idx];
-        }
+        // response time = first start - arrival
+        rt[idx] = time - at[idx];
 
-        // execute process for 1 time unit (tick)
+        // run the process to completion
         gantt_pid[gc] = idx;
         gantt_start[gc] = time;
+        time += bt[idx];
+        gantt_end[gc] = time;
+        gc++;
 
-        time++;                 // advance system clock by 1 tick
-        rem[idx]--;             // decrease remaining burst time by 1
-
-        gantt_end[gc] = time;   // end time of this 1-tick block
-        gc++;                   // move to next gantt slot
-        last_pid = idx;         // update last running process
-
-        // check if process finished execution
-        if (rem[idx] == 0) {
-            ct[idx] = time;
-            tat[idx] = ct[idx] - at[idx];
-            wt[idx] = tat[idx] - bt[idx];
-            done[idx] = 1;
-            completed++;
-        }
+        ct[idx] = time;
+        tat[idx] = ct[idx] - at[idx];
+        wt[idx] = tat[idx] - bt[idx];
+        done[idx] = 1;
+        completed++;
+        last_pid = idx;
     }
 
     // -------------------------------------------
 
-    // PRINT EVERYTHING 
+    // PRINT EVERYTHING
 
     // 1. Print Top Border
     printf("\nGantt Chart:\n+");
@@ -2371,53 +2205,47 @@ void solve(int n, int at[], int bt[], int pr[]) {
     // 2. Print Process Names / IDLE inside boxes
     printf("\n|");
     for (int i = 0; i < gc; i++) {
-        if (gantt_pid[i] == -1) {
-            printf(" IDLE |");
-        }
-        else {
-            printf("  P%-d |", gantt_pid[i] + 1);
-        } 
+        if (gantt_pid[i] == -1) printf(" IDLE |");
+        else printf("  P%-2d |", gantt_pid[i] + 1);
     }
 
     // 3. Print Bottom Border
     printf("\n+");
     for (int i = 0; i < gc; i++) printf("------+");
 
-    // 4. Print Timeline Numbers underneath
-    printf("\n%-d", gantt_start[0]);
+    // 4. Print Timeline Numbers underneath (7 chars per block)
+    printf("\n%-7d", gantt_start[0]);
     for (int i = 0; i < gc; i++) {
-        printf("   %-d", gantt_end[i]);
+        printf("%-7d", gantt_end[i]);
     }
     printf("\n");
 
     // Print process metrics table cleanly using tabs
-    printf("\nProcess\tAT\tBT\tPriority\tCT\tRT\tTAT\tWT\tPreempt\n");
-    printf("-------------------------------------------------------------------\n");
+    printf("\nProcess\tAT\tBT\tCT\tRT\tTAT\tWT\n");
+    printf("-------------------------------------------------------\n");
 
     float sum_wt = 0.0f, sum_tat = 0.0f;
     for (int i = 0; i < n; i++) {
-        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
-               i + 1, at[i], bt[i], pr[i], ct[i], rt[i], tat[i], wt[i], pre[i]);
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], ct[i], rt[i], tat[i], wt[i]);
         sum_wt += wt[i];
         sum_tat += tat[i];
     }
 
     // Print Summary Averages & Context Switches
     printf("\nAverage Waiting Time       = %.2f\n", sum_wt / n);
-    printf("Average Turnaround Time    = %.2f\n", sum_tat / n); 
+    printf("Average Turnaround Time    = %.2f\n", sum_tat / n);
     printf("Number of Context Switches = %d\n", cswitch);
 }
 
 int main(void) {
     // HARDCODED INPUT: edit these values to test other cases
-    // Priority: 1 is highest
     int n = 4;                          // no of process
     int at[MAX] = {0, 1, 2, 3};         // Arrival Times
     int bt[MAX] = {6, 4, 3, 2};         // Burst Times
-    int pr[MAX] = {3, 1, 4, 2};         // Priorities
 
     // solve
-    solve(n, at, bt, pr);
+    solve(n, at, bt);
     return 0;
 }
 </script>
@@ -3050,6 +2878,48 @@ int main(void)
     try { history.replaceState(null, "", "#" + id); } catch (e) {}
     syncFindToCurrent();
   }
+
+  /* ---------- gedit look: tabs, gutter width, chevrons ---------- */
+  var CHEV = '<svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>';
+  var XICO = '<svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  document.getElementById("sidebarBtn").innerHTML =
+    '<svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2.2"/><path d="M8 5.5v5M5.5 8h5"/></svg>';
+
+  sections.forEach(function (s) {
+    var head = s.card.querySelector(".card-head");
+    head.innerHTML = "";
+    sections.forEach(function (o) {
+      if (o.data.group !== s.data.group) return;
+      var t = document.createElement("div");
+      t.className = "tab" + (o === s ? " on" : "");
+      t.innerHTML = "<span>" + esc(o.data.title) + "</span>" + XICO;
+      t.addEventListener("click", function () { show(o.data.id); });
+      t._s = o;
+      head.appendChild(t);
+    });
+    s.card.querySelector(".code").style.setProperty("--d", Math.max(2, String(s.lines.length).length));
+    s.lines[0].el.classList.add("cur");
+    s.card.querySelectorAll(".statusbar span").forEach(function (sp) {
+      sp.innerHTML = sp.innerHTML.replace(/\u2304/g, CHEV);
+    });
+  });
+
+  function refreshTabs() {
+    sections.forEach(function (s) {
+      s.card.querySelectorAll(".tab").forEach(function (t) {
+        t.classList.toggle("hidden", t._s.card.classList.contains("hidden"));
+      });
+    });
+    if (current) {
+      var h = current.card.querySelector(".card-head"), a = h.querySelector(".tab.on");
+      if (a) h.scrollLeft = a.offsetLeft - (h.clientWidth - a.offsetWidth) / 2;
+    }
+  }
+  var _show = show;
+  show = function (id) { _show(id); refreshTabs(); };
+  q.addEventListener("input", refreshTabs);
+  findInput.addEventListener("input", refreshTabs);
+
   var startId = (location.hash || "").slice(1);
   var okStart = sections.some(function (s) { return s.data.id === startId; });
   show(okStart ? startId : sections[0].data.id);
