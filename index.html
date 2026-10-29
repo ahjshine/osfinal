@@ -259,33 +259,115 @@ main { margin-left: 270px; max-width: none; padding: 60px 0 0; height: 100vh; di
   font-family: ui-monospace, "Source Code Pro", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 12.5px;
 }
 @media (max-width: 800px) { main { margin-left: 0; padding: 60px 0 0; } .statusbar .tw { display: none; } }
+/* ===== Header like gedit headerbar ===== */
+:root { --hdr: #e8e8e6; --hbtn: #f6f5f4; --hbtn-border: #cdcdca; }
+:root[data-theme="dark"] { --hdr: #353b3d; --hbtn: #3f4647; --hbtn-border: #52595b; }
+header {
+  height: 50px; padding: 0; gap: 0; align-items: stretch;
+  background: var(--hdr); border-bottom: 1px solid var(--border);
+}
+.hb-left {
+  width: 270px; flex: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-weight: 700; font-size: 14px; border-right: 1px solid var(--border);
+}
+.hb-right { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 8px 0 10px; }
+.hb-group { display: flex; align-items: center; gap: 8px; flex: none; }
+.hb-right button {
+  height: 34px; padding: 0 16px; font-size: 14px; background: var(--hbtn);
+  border: 1px solid var(--hbtn-border); border-radius: 6px; color: var(--text);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.hb-right button:hover { filter: brightness(.97); background: var(--hbtn); }
+.hb-right .sq { width: 36px; padding: 0; }
+.hb-right .x { border: 0; background: transparent; width: 32px; padding: 0; }
+.hb-right .x:hover { background: var(--fb-hover); }
+.hb-right svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.split { display: inline-flex; }
+.split button:first-child { border-radius: 6px 0 0 6px; }
+.split .arrow { border-radius: 0 6px 6px 0; border-left: 0; padding: 0 9px; }
+.hb-title { flex: 1; min-width: 0; text-align: center; line-height: 1.25; }
+.hb-title b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb-title small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-wrap { position: relative; }
+.pop {
+  position: absolute; right: 0; top: 42px; min-width: 200px; padding: 6px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18); z-index: 40;
+}
+.pop[hidden] { display: none; }
+.hb-right .pop button {
+  width: 100%; height: 32px; justify-content: space-between; padding: 0 10px;
+  background: transparent; border: 0; border-radius: 6px; font-size: 14px;
+}
+.hb-right .pop button:hover { background: var(--fb-hover); filter: none; }
+.pop .tick { visibility: hidden; color: var(--accent); }
+.pop button.on .tick { visibility: visible; }
+.pop .sep { height: 1px; background: var(--border); margin: 5px 4px; }
+/* sidebar header row + search */
+aside { top: 50px; }
+.fb-nav { height: 44px; padding: 0 8px; background: var(--hdr); }
+.fb-search { flex: 1; min-width: 0; position: relative; }
+.fb-search svg { position: absolute; left: 8px; top: 8px; width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 1.8; stroke-linecap: round; }
+.fb-search input {
+  width: 100%; height: 30px; padding: 0 8px 0 27px; font-size: 14px;
+  background: var(--bg); color: var(--text); border: 1px solid var(--fb-btn-border);
+  border-radius: 6px; outline: none;
+}
+.fb-search input:focus { border-color: var(--accent); }
+/* tab bar: no blue */
+main { padding-top: 50px; }
+.card-head { height: 44px; background: var(--hdr); border-bottom: 1px solid var(--border); padding: 0; }
+.card-head h3 { height: 44px; line-height: 44px; border-bottom: 0; background: var(--hdr); }
+body.sb-hidden aside { display: none; }
+body.sb-hidden main { margin-left: 0; }
+@media (max-width: 800px) {
+  .hb-left, .hb-title small, #openBtn, #openArrow { display: none; }
+  .hb-title b { text-align: center; }
+  main { padding-top: 50px; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <button id="menu" aria-label="Toggle sidebar">&#9776;</button>
-  <h1>Code Reference</h1>
-  <div class="search">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-    <input id="q" type="search" placeholder="Search programs and code  ( press / )" autocomplete="off">
+  <div class="hb-left"><span>File Browser</span><svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></div>
+  <div class="hb-right">
+    <div class="hb-group">
+      <div class="split">
+        <button id="openBtn" title="Search programs">Open</button>
+        <button id="openArrow" class="arrow" title="Expand / collapse all folders" aria-label="Expand or collapse folders"><svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>
+      </div>
+      <button id="sidebarBtn" class="sq" title="Show / hide sidebar" aria-label="Toggle sidebar"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
+    </div>
+    <div class="hb-title"><b id="hbName"></b><small id="hbPath"></small></div>
+    <div class="hb-group">
+      <button id="saveBtn" title="Download this program as a file">Save</button>
+      <div class="menu-wrap">
+        <button id="menuBtn" class="sq" title="Menu" aria-label="Menu"><svg viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>
+        <div id="menuPop" class="pop" hidden>
+          <button data-act="theme" data-theme-opt="light"><span>Light mode</span><span class="tick">&#10003;</span></button>
+          <button data-act="theme" data-theme-opt="dark"><span>Dark mode</span><span class="tick">&#10003;</span></button>
+          <div class="sep"></div>
+          <button data-act="copy"><span>Copy code</span></button>
+          <button data-act="copyall"><span>Copy all codes</span></button>
+        </div>
+      </div>
+      <button id="closeBtn" class="x" title="Reset view" aria-label="Reset view"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
   </div>
-  <div class="spacer"></div>
-  <button id="copyAll" class="primary">Copy all codes</button>
-  <button id="theme" aria-label="Toggle dark mode">&#9790; <span class="lbl">Dark</span></button>
 </header>
 
 <aside id="side">
-  <div class="fb-title"><span>File Browser</span>
-    <svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
-  </div>
   <div class="fb-nav">
     <div class="seg">
       <button id="navBack" title="Previous" aria-label="Previous"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button>
       <button id="navFwd" title="Next" aria-label="Next"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
     </div>
     <button id="navUp" class="up" title="Back to top" aria-label="Back to top"><svg viewBox="0 0 16 16"><path d="M3 10l5-5 5 5"/></svg></button>
-    <button id="navRoot" class="root" title="Expand / collapse all"><span>code-reference</span><svg class="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>
+    <div class="fb-search">
+      <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      <input id="q" type="search" placeholder="Search" autocomplete="off" aria-label="Search programs">
+    </div>
   </div>
   <div id="tree"></div>
 </aside>
@@ -2589,14 +2671,6 @@ int main(void)
       var head = document.createElement("div");
       head.className = "card-head";
       head.innerHTML = '<h3>' + esc(p.title) + '</h3><span class="badge">' + (p.lang === "c" ? "C" : "Bash") + '</span>';
-      var btn = document.createElement("button");
-      btn.textContent = "Copy code";
-      btn.addEventListener("click", function () {
-        copyText(p.code, "Copied: " + p.title);
-        btn.textContent = "Copied!";
-        setTimeout(function () { btn.textContent = "Copy code"; }, 1500);
-      });
-      head.appendChild(btn);
 
       var wrap = document.createElement("div");
       wrap.className = "code-wrap";
@@ -2707,29 +2781,26 @@ int main(void)
   });
 
   /* ---------- Copy all ---------- */
-  document.getElementById("copyAll").addEventListener("click", function () {
+  function copyAllCodes() {
     var out = sections.map(function (s) {
       var c = s.data.lang === "c" ? "//" : "#";
       var bar = c + " ==================================================\n";
       return bar + c + " " + s.data.group + " - " + s.data.title + "\n" + bar + "\n" + s.data.code;
     }).join("\n\n");
     copyText(out, "Copied all " + sections.length + " programs");
-  });
+  }
 
   /* ---------- Theme ---------- */
-  var themeBtn = document.getElementById("theme");
   function setTheme(t) {
     document.documentElement.setAttribute("data-theme", t);
-    themeBtn.innerHTML = t === "dark" ? "&#9728; <span class=\"lbl\">Light</span>" : "&#9790; <span class=\"lbl\">Dark</span>";
+    document.querySelectorAll("#menuPop [data-theme-opt]").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-theme-opt") === t);
+    });
     try { localStorage.setItem("codeRefTheme", t); } catch (e) {}
   }
   var saved = null;
   try { saved = localStorage.getItem("codeRefTheme"); } catch (e) {}
-  if (!saved) saved = "light";
-  setTheme(saved);
-  themeBtn.addEventListener("click", function () {
-    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
-  });
+  setTheme(saved === "dark" ? "dark" : "light");
 
   /* ---------- File browser nav buttons ---------- */
   function visibleSections() {
@@ -2745,15 +2816,54 @@ int main(void)
   document.getElementById("navBack").addEventListener("click", function () { step(-1); });
   document.getElementById("navFwd").addEventListener("click", function () { step(1); });
   document.getElementById("navUp").addEventListener("click", function () { if (current) current.card.querySelector(".code-wrap").scrollTo({ top: 0, behavior: "smooth" }); });
-  document.getElementById("navRoot").addEventListener("click", function () {
+  document.getElementById("openArrow").addEventListener("click", function () {
     var fs = tree.querySelectorAll(".folder");
     var anyOpen = Array.prototype.some.call(fs, function (f) { return !f.classList.contains("collapsed"); });
     fs.forEach(function (f) { f.classList.toggle("collapsed", anyOpen); });
   });
 
-  /* ---------- Mobile sidebar ---------- */
-  document.getElementById("menu").addEventListener("click", function () {
-    side.classList.toggle("open");
+  /* ---------- Header buttons ---------- */
+  var menuPop = document.getElementById("menuPop");
+  document.getElementById("menuBtn").addEventListener("click", function (e) {
+    e.stopPropagation();
+    menuPop.hidden = !menuPop.hidden;
+  });
+  document.addEventListener("click", function (e) {
+    if (!menuPop.contains(e.target)) menuPop.hidden = true;
+  });
+  menuPop.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var act = b.getAttribute("data-act");
+    if (act === "theme") setTheme(b.getAttribute("data-theme-opt"));
+    else if (act === "copy") { if (current) copyText(current.data.code, "Copied: " + current.data.title); }
+    else if (act === "copyall") copyAllCodes();
+    menuPop.hidden = true;
+  });
+  document.getElementById("openBtn").addEventListener("click", function () {
+    if (window.innerWidth <= 800) side.classList.add("open");
+    document.body.classList.remove("sb-hidden");
+    q.focus();
+  });
+  document.getElementById("sidebarBtn").addEventListener("click", function () {
+    if (window.innerWidth <= 800) side.classList.toggle("open");
+    else document.body.classList.toggle("sb-hidden");
+  });
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    if (!current) return;
+    var name = current.data.title.replace(/^\d+\.\s*/, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") +
+      (current.data.lang === "c" ? ".c" : ".sh");
+    var url = URL.createObjectURL(new Blob([current.data.code], { type: "text/plain" }));
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+    showToast("Saved " + name);
+  });
+  document.getElementById("closeBtn").addEventListener("click", function () {
+    q.value = "";
+    applySearch();
+    show(sections[0].data.id);
   });
 
   /* ---------- Show one program at a time ---------- */
@@ -2768,6 +2878,8 @@ int main(void)
       s.link.classList.toggle("active", on);
     });
     current = t;
+    document.getElementById("hbName").textContent = t.data.title;
+    document.getElementById("hbPath").textContent = "~/" + t.data.group.toLowerCase().replace(/\s*\(([^)]*)\)/, "/$1").replace(/[^a-z0-9\/]+/g, "-");
     var wrap = t.card.querySelector(".code-wrap");
     wrap.scrollTop = 0;
     wrap.scrollLeft = 0;
